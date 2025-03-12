@@ -1,4 +1,4 @@
-package com.cook.cookapp.storedFoods.repository;
+package com.cook.cookapp.ingredient.repository;
 
 import org.springframework.stereotype.Repository;
 

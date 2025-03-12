@@ -1,4 +1,4 @@
-package com.cook.cookapp.storedFoods.service;
+package com.cook.cookapp.ingredient.service;
 
 
 import jakarta.transaction.Transactional;
@@ -8,5 +8,5 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 @Transactional
-public class storedFoodsService {
+public class IngredientServiceImpl {
 }

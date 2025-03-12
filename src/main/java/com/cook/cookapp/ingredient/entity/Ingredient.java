@@ -1,8 +1,8 @@
-package com.cook.cookapp.storedFoods.entity;
+package com.cook.cookapp.ingredient.entity;
 
 
 import com.cook.cookapp.global.BaseEntity;
-import com.cook.cookapp.storedFoods.entity.Enum.AlarmStatus;
+import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Entity
 @Builder
-public class storedFoods extends BaseEntity {
+public class Ingredient extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
