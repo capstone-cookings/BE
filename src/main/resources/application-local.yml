@@ -12,7 +12,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
@@ -31,3 +31,10 @@ logging:
 
 file:
   upload-dir: upload
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+
+kakao:
+  client_id: ${KAKAO_ID}
+  redirect_uri: http://localhost:8080/callback
