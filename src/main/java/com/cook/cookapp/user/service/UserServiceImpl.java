@@ -37,7 +37,19 @@ public class UserServiceImpl implements UserService {
 
         return UserConverter.signInRes(user, accessToken, refreshToken, user.getNickname());
     }
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response, String accessToken) {
+        if (accessToken != null) {
+            jwtTokenProvider.invalidateToken(accessToken); // 액세스 토큰을 블랙리스트에 추가
+        }
 
+        // 리프레시 토큰 삭제 (AccessToken이 만료된 경우 대비)
+        String refreshToken = jwtTokenProvider.resolveRefreshToken();
+        if (refreshToken != null) {
+            Long userId = jwtTokenProvider.getUserIdInToken(refreshToken); // RefreshToken을 활용해 UserId 가져오기
+            jwtTokenProvider.deleteRefreshToken(userId);
+        }
+    }
 
     public User kakaoSignup(KakaoUserInfoResponseDto userInfo) {
         //이미 회원가입한 이메일이 있다면 user 리턴

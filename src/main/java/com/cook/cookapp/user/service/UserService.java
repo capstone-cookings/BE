@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface UserService {
     UserDtoRes.UserLoginRes login(HttpServletRequest request, HttpServletResponse response, UserDtoReq.LoginReq loginDto);
+    void logout(HttpServletRequest request, HttpServletResponse response, String accessToken);
     User kakaoSignup(KakaoUserInfoResponseDto userInfo);
     UserDtoRes.UserLoginRes kakaoLogin(HttpServletRequest request, HttpServletResponse response, User user);
 }

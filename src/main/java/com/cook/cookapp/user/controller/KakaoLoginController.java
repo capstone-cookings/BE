@@ -8,6 +8,7 @@ import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
 import com.cook.cookapp.user.service.KakaoService;
 import com.cook.cookapp.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class KakaoLoginController {
         return ApiResponse.onSuccess(userService.kakaoLogin(request,response, userService.kakaoSignup(userInfo)));
     }
 
+    @Operation(summary = "로그인한 유저 id 확인하기", description = "test용")
     @PostMapping("whoami")
     public Long whoami() {
         Long userIdFromToken = jwtTokenProvider.getUserIdFromToken();
