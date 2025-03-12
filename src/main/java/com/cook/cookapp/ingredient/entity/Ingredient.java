@@ -3,6 +3,8 @@ package com.cook.cookapp.ingredient.entity;
 
 import com.cook.cookapp.global.BaseEntity;
 import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
+import com.cook.cookapp.ingredient.entity.Enum.StorageType;
+import com.cook.cookapp.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -35,15 +37,27 @@ public class Ingredient extends BaseEntity {
     @Column
     private int count;
 
-    //알림 상태 (ON,OFF)
+    //알림 상태 (ON,OFF) - 기본값 ON.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AlarmStatus alarmStatus = AlarmStatus.ON;
+
+    // 저장 타입 (냉장, 냉동) - 기본값 냉장.
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StorageType storageType = StorageType.REFRIGERATED;
 
     @PrePersist
     public void prePersist() {
         if (this.alarmStatus == null) {
             this.alarmStatus = AlarmStatus.ON;
         }
+        if (this.storageType == null) {
+            this.storageType = StorageType.REFRIGERATED;
+        }
     }
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
