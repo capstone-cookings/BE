@@ -37,17 +37,30 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 비활성화
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
-                                "/swagger-resources/**", "/webjars/**", "/health", "/api/**", "/api/essay/**",
-                                "/callback", "/login/**" , "/oauth/**").permitAll() // 공개 엔드포인트 설정
+                        // Swagger 관련 요청 허용 (여기까지는 인증 없이 접근 가능)
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+
+                        // 기타 공개 엔드포인트 설정
+                        .requestMatchers(
+                                "/health", "/api/**", "/api/essay/**",
+                                "/callback", "/login/**", "/oauth/**"
+                        ).permitAll()
+
+                        // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .accessDeniedHandler(accessDeniedHandler()) // 접근 거부 핸들러 설정
                         .authenticationEntryPoint(authenticationEntryPoint()) // 인증 실패 핸들러 설정
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class) // JWT 필터 추가
-                .addFilterBefore(exceptionHandlerFilter(), JwtAuthenticationFilter.class); // 예외 핸들러 필터 추가
+                // JWT 필터를 추가하되, Swagger 관련 요청은 제외하도록 설정
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(exceptionHandlerFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
     }
