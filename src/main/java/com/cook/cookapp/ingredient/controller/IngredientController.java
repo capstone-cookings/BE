@@ -5,6 +5,7 @@ import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.common.validation.ValidPage;
 import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
 import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
+import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import com.cook.cookapp.ingredient.service.IngredientService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/storedFoods")
+@RequestMapping("/api/ingredient")
 @RequiredArgsConstructor
 public class IngredientController {
 
@@ -65,7 +66,7 @@ public class IngredientController {
 
     @Operation(summary = "유통기한 알림 설정 API", description = "사용자가 특정 식재료의 알림 설정을 ON/OFF 합니다.")
     @PatchMapping("/{ingredientId}/alarm")
-    public ApiResponse<String> updateAlarmStatus(@PathVariable Long ingredientId, @RequestParam boolean alarmStatus) {
+    public ApiResponse<String> updateAlarmStatus(@PathVariable Long ingredientId, @RequestParam AlarmStatus alarmStatus) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         ingredientService.updateAlarmStatus(userId, ingredientId, alarmStatus);
         return ApiResponse.onSuccess("알림 설정이 변경되었습니다.");

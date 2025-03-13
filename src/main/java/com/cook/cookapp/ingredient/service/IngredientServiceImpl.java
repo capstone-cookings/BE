@@ -6,6 +6,7 @@ import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.ingredient.converter.IngredientConverter;
 import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
 import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
+import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import com.cook.cookapp.ingredient.entity.Ingredient;
 import com.cook.cookapp.ingredient.repository.IngredientRepository;
 import com.cook.cookapp.user.entity.User;
@@ -64,7 +65,7 @@ public class IngredientServiceImpl implements IngredientService{
     }
 
     @Override
-    public void updateAlarmStatus(Long userId, Long ingredientId, boolean alarmStatus) {
+    public void updateAlarmStatus(Long userId, Long ingredientId, AlarmStatus alarmStatus) {
         Ingredient ingredient = ingredientRepository.findByIdAndUserId(ingredientId, userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._BAD_REQUEST));
 

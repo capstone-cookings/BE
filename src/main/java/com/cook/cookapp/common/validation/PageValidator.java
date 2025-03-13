@@ -9,7 +9,10 @@ public class PageValidator implements ConstraintValidator<ValidPage, Integer> {
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext context) {
         if (value == null || value <= 0) {
-            throw new GeneralException(ErrorStatus._BAD_REQUEST);
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("페이지 번호는 1 이상의 값이어야 합니다.")
+                    .addConstraintViolation();
+            return false; // 예외를 던지는 대신 `false` 반환하여 기본 검증 오류 메시지 제공
         }
         return true;
     }

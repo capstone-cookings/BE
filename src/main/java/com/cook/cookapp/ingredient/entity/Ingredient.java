@@ -70,9 +70,4 @@ public class Ingredient extends BaseEntity {
         this.storageType = ingredientDtoReq.getStorageType();
         this.alarmStatus = ingredientDtoReq.getAlarmStatus();
     }
-
-    // 알림 상태 변경 메서드
-    public void setAlarmStatus(boolean alarmStatus) {
-        this.alarmStatus = alarmStatus ? AlarmStatus.ON : AlarmStatus.OFF;
-    }
 }
