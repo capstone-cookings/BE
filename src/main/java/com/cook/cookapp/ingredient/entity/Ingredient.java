@@ -2,6 +2,7 @@ package com.cook.cookapp.ingredient.entity;
 
 
 import com.cook.cookapp.global.BaseEntity;
+import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
 import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import com.cook.cookapp.ingredient.entity.Enum.StorageType;
 import com.cook.cookapp.user.entity.User;
@@ -47,6 +48,10 @@ public class Ingredient extends BaseEntity {
     @Column(nullable = false)
     private StorageType storageType = StorageType.REFRIGERATED;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @PrePersist
     public void prePersist() {
         if (this.alarmStatus == null) {
@@ -57,7 +62,12 @@ public class Ingredient extends BaseEntity {
         }
     }
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    // 식재료 정보 업데이트 메서드
+    public void update(IngredientDtoReq ingredientDtoReq) {
+        this.foodName = ingredientDtoReq.getFoodName();
+        this.useByDate = ingredientDtoReq.getUseByDate();
+        this.count = ingredientDtoReq.getCount();
+        this.storageType = ingredientDtoReq.getStorageType();
+        this.alarmStatus = ingredientDtoReq.getAlarmStatus();
+    }
 }
