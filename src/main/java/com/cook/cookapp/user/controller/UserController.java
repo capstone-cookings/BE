@@ -1,19 +1,32 @@
 package com.cook.cookapp.user.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
+import com.cook.cookapp.apiPayload.code.exception.handler.UserHandler;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
+import com.cook.cookapp.user.dto.res.UserProfileResponse;
+import com.cook.cookapp.user.entity.User;
+import com.cook.cookapp.user.repository.UserRepository;
 import com.cook.cookapp.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static com.cook.cookapp.apiPayload.code.status.ErrorStatus.NICKNAME_DUPLICATION;
+import static com.cook.cookapp.apiPayload.code.status.ErrorStatus.USER_NOT_FOUND;
 
 @RestController
 @RequestMapping("/api/user")
@@ -22,6 +35,8 @@ public class UserController {
     
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
+
     @Operation(summary = "로그인 API", description = "로그인")
     @PostMapping("/login")
     public ApiResponse<UserDtoRes.UserLoginRes> login(@RequestBody UserDtoReq.LoginReq loginDto, HttpServletRequest request, HttpServletResponse response) {
@@ -68,4 +83,49 @@ public class UserController {
 
         return ApiResponse.onSuccess(tokens);
     }
+
+    @Operation(summary = "닉네임 중복 확인 API", description = "닉네임 설정 시 중복을 방지합니다.")
+    @GetMapping("/nickname/check")
+    public ApiResponse<SuccessStatus> checkNickname(@RequestParam String nickname) {
+        boolean exists = userRepository.existsByNickname(nickname);
+
+        if (exists) {
+            throw new UserHandler(NICKNAME_DUPLICATION);
+        }
+
+        return ApiResponse.onSuccess(SuccessStatus._OK);
+    }
+
+    @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
+    @GetMapping("/profile")
+    public ApiResponse<UserProfileResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return ApiResponse.onSuccess(new UserProfileResponse(user));
+    }
+
+    @Operation(summary = "다른 사용자 프로필 조회 API", description = "다른 사용자의 프로필을 조회합니다.")
+    @GetMapping("/profile/other")
+    public ApiResponse<UserProfileResponse> getOtherProfile(@RequestParam Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return ApiResponse.onSuccess(new UserProfileResponse(user));
+    }
+
+    // 공동구매 커뮤니티 매너 평가로 변경해야 함
+    @Operation(summary = "사용자 경험치 변경 API", description = "매너평가로 사용자 경험치 변경합니다")
+    @PatchMapping("/exp")
+    public ApiResponse<UserProfileResponse> chagneUserExp(@RequestParam Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return ApiResponse.onSuccess(new UserProfileResponse(user));
+    }
+
+
+
 }
