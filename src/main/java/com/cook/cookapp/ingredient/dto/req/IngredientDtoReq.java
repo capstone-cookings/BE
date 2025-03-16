@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class IngredientDtoReq {
     private String foodName;
-    private LocalDate useByDate;
+    private Long useByDate;
     private int count;
-    private StorageType storageType;
-    private AlarmStatus alarmStatus;
+    private boolean storageType;
+    private boolean alarmStatus;
 }

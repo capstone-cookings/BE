@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,7 +34,7 @@ public class IngredientController {
     @Operation(summary = "식재료 전체 조회 (등록 순) API", description = "사용자가 저장한 모든 식재료를 등록 순으로 조회합니다.")
     @GetMapping("/createdAt")
     public ApiResponse<Page<IngredientDtoRes>> getAllIngredientsByCreatedAt(
-            @RequestParam(defaultValue = "1") @ValidPage int page, Pageable pageable) {
+            @RequestParam(defaultValue = "1") @ValidPage int page,@PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         return ApiResponse.onSuccess(ingredientService.getAllIngredientsByCreatedAt(userId, adjustedPageable));
@@ -42,7 +43,7 @@ public class IngredientController {
     @Operation(summary = "식재료 전체 조회 (소비기한 순) API", description = "사용자가 저장한 모든 식재료를 소비기한이 빠른 순으로 조회합니다.")
     @GetMapping("/useByDate")
     public ApiResponse<Page<IngredientDtoRes>> getAllIngredientsByUseByDate(
-            @RequestParam(defaultValue = "1") @ValidPage int page, Pageable pageable) {
+            @RequestParam(defaultValue = "1") @ValidPage int page,@PageableDefault(size = 10,  sort = "useByDate") Pageable pageable) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         return ApiResponse.onSuccess(ingredientService.getAllIngredientsByUseByDate(userId, adjustedPageable));
@@ -66,7 +67,7 @@ public class IngredientController {
 
     @Operation(summary = "유통기한 알림 설정 API", description = "사용자가 특정 식재료의 알림 설정을 ON/OFF 합니다.")
     @PatchMapping("/{ingredientId}/alarm")
-    public ApiResponse<String> updateAlarmStatus(@PathVariable Long ingredientId, @RequestParam AlarmStatus alarmStatus) {
+    public ApiResponse<String> updateAlarmStatus(@PathVariable Long ingredientId, @RequestParam boolean alarmStatus) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         ingredientService.updateAlarmStatus(userId, ingredientId, alarmStatus);
         return ApiResponse.onSuccess("알림 설정이 변경되었습니다.");
