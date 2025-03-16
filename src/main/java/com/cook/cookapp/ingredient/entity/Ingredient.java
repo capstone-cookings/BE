@@ -10,7 +10,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 
 @Getter
@@ -65,9 +67,11 @@ public class Ingredient extends BaseEntity {
     // 식재료 정보 업데이트 메서드
     public void update(IngredientDtoReq ingredientDtoReq) {
         this.foodName = ingredientDtoReq.getFoodName();
-        this.useByDate = ingredientDtoReq.getUseByDate();
+        this.useByDate =  Instant.ofEpochMilli(ingredientDtoReq.getUseByDate())
+                .atZone(ZoneId.systemDefault()) // 밀리초(Long) → LocalDate 변환
+                .toLocalDate();
         this.count = ingredientDtoReq.getCount();
-        this.storageType = ingredientDtoReq.getStorageType();
-        this.alarmStatus = ingredientDtoReq.getAlarmStatus();
+        this.storageType = ingredientDtoReq.isStorageType() ? StorageType.FROZEN : StorageType.REFRIGERATED;
+        this.alarmStatus = ingredientDtoReq.isAlarmStatus() ? AlarmStatus.ON : AlarmStatus.OFF;
     }
 }
