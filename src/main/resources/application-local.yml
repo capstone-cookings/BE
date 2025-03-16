@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/cookapp?serverTimezone=Asia/Seoul
+    username: root
+    password: 4014
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+
+  security:
+    user:
+      name: user
+      password: password
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
+file:
+  upload-dir: upload
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+
+kakao:
+  client_id: ${KAKAO_ID}
+  redirect_uri: http://localhost:8080/callback
