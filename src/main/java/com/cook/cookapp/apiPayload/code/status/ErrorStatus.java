@@ -37,7 +37,12 @@ public enum ErrorStatus implements BaseErrorCode {
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE404", "공지사항을 찾을 수 없습니다."),
     NOTICE_NOT_UPDATE(HttpStatus.BAD_REQUEST, "NOTICE400", "공지사항 수정 실패"),
 
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER404", "사용자를 찾을 수 없습니다.");
+    //User
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4004", "사용자를 찾을 수 없습니다."),
+    NICKNAME_DUPLICATION(HttpStatus.BAD_REQUEST, "MEMBER4002", "닉네임 중복입니다");
+
+
+
 
     private final HttpStatus httpStatus;
     private final String code;
