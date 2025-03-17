@@ -177,7 +177,7 @@ public class JwtTokenProvider {
     // UserId 추출
     public Long getUserIdFromToken() {
         String accessToken = resolveAccessToken();
-        return (accessToken != null) ? getUserIdInToken(accessToken) : null;
+        return getUserIdInToken(accessToken);
     }
 
     // 토큰에서 userId 추출
