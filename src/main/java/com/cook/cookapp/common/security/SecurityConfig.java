@@ -89,7 +89,9 @@ public class SecurityConfig {
         // 허용할 Origin 도메인 설정
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8080",
-                "https://localhost:8080"
+                "https://localhost:8080",
+                "http://refrigerator-env.eba-aatuyi7s.ap-northeast-2.elasticbeanstalk.com/",
+                "https://refrigerator-env.eba-aatuyi7s.ap-northeast-2.elasticbeanstalk.com/"
 //                ,"http://replendar.site",// 추가 도메인
 //                "https://replendar.site",
 //                "https://*.replendar.site",
