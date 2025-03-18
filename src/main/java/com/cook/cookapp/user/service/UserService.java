@@ -13,6 +13,5 @@ public interface UserService {
     User kakaoSignup(KakaoUserInfoResponseDto userInfo);
     UserDtoRes.UserLoginRes kakaoLogin(HttpServletRequest request, HttpServletResponse response, User user);
     boolean duplicateNickname(String nickname);
-    User getUserByEmail(String email);
     User getUserByNickname(String nickname);
 }

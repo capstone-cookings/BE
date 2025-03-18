@@ -100,9 +100,10 @@ public class UserController {
 
     @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile")
-    public ApiResponse<UserProfileResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        User user = userServiceImpl.getUserByEmail(email);
+    public ApiResponse<UserProfileResponse> getProfile() {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+
+        User user = userServiceImpl.getUserById(userId);
         return ApiResponse.onSuccess(UserProfileResponse.fromUser(user));
     }
 
