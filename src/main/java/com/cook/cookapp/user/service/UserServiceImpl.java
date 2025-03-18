@@ -1,5 +1,7 @@
 package com.cook.cookapp.user.service;
 
+import com.cook.cookapp.common.security.CustomUserDetail;
+import com.cook.cookapp.common.security.CustomUserDetailsService;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
@@ -12,8 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -75,4 +80,23 @@ public class UserServiceImpl implements UserService {
 
         return UserConverter.signInRes(user, accessToken, refreshToken, user.getNickname());
     }
+
+    public boolean duplicateNickname(String nickname){
+        boolean exists = userRepository.existsByNickname(nickname);
+        return exists;
+    }
+
+    public User getUserByEmail(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return user;
+    }
+
+    public User getUserByNickname(String nickname){
+        User user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return user;
+    }
+
 }

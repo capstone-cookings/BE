@@ -11,6 +11,7 @@ import com.cook.cookapp.user.dto.res.UserProfileResponse;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
 import com.cook.cookapp.user.service.UserService;
+import com.cook.cookapp.user.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +37,7 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final UserServiceImpl userServiceImpl;
 
     @Operation(summary = "로그인 API", description = "로그인")
     @PostMapping("/login")
@@ -87,44 +89,39 @@ public class UserController {
     @Operation(summary = "닉네임 중복 확인 API", description = "닉네임 설정 시 중복을 방지합니다.")
     @GetMapping("/nickname/check")
     public ApiResponse<SuccessStatus> checkNickname(@RequestParam String nickname) {
-        boolean exists = userRepository.existsByNickname(nickname);
+        boolean exists = userService.duplicateNickname(nickname);
 
         if (exists) {
             throw new UserHandler(NICKNAME_DUPLICATION);
         }
 
-        return ApiResponse.onSuccess(SuccessStatus._OK);
+        return ApiResponse.onSuccess(SuccessStatus.SUCCESS_GET_NICKNAME);
     }
 
     @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile")
     public ApiResponse<UserProfileResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return ApiResponse.onSuccess(new UserProfileResponse(user));
+        User user = userServiceImpl.getUserByEmail(email);
+        return ApiResponse.onSuccess(UserProfileResponse.fromUser(user));
     }
 
     @Operation(summary = "다른 사용자 프로필 조회 API", description = "다른 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile/other")
-    public ApiResponse<UserProfileResponse> getOtherProfile(@RequestParam Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return ApiResponse.onSuccess(new UserProfileResponse(user));
+    public ApiResponse<UserProfileResponse> getOtherProfile(@RequestParam String nickname) {
+        User user = userServiceImpl.getUserByNickname(nickname);
+        return ApiResponse.onSuccess(UserProfileResponse.fromUser(user));
     }
 
-    // 공동구매 커뮤니티 매너 평가로 변경해야 함
-    @Operation(summary = "사용자 경험치 변경 API", description = "매너평가로 사용자 경험치 변경합니다")
-    @PatchMapping("/exp")
-    public ApiResponse<UserProfileResponse> chagneUserExp(@RequestParam Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return ApiResponse.onSuccess(new UserProfileResponse(user));
-    }
+//    // 공동구매 커뮤니티 매너 평가로 변경해야 함
+//    @Operation(summary = "사용자 경험치 변경 API", description = "매너평가로 사용자 경험치 변경합니다")
+//    @PatchMapping("/exp")
+//    public ApiResponse<UserProfileResponse> chagneUserExp(@RequestParam Long userId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+//
+//        return ApiResponse.onSuccess(new UserProfileResponse(user));
+//    }
 
 
 
