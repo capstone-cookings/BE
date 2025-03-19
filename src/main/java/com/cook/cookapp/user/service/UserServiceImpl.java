@@ -3,6 +3,10 @@ package com.cook.cookapp.user.service;
 import com.cook.cookapp.common.security.CustomUserDetail;
 import com.cook.cookapp.common.security.CustomUserDetailsService;
 import com.cook.cookapp.common.security.JwtTokenProvider;
+import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
+import com.cook.cookapp.recipe.entity.Recipe;
+import com.cook.cookapp.recipe.entity.RecipeIngredient;
+import com.cook.cookapp.recipe.repository.RecipeRepository;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
@@ -26,6 +30,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RecipeRepository recipeRepository;
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public UserDtoRes.UserLoginRes login(HttpServletRequest request, HttpServletResponse response, UserDtoReq.LoginReq loginDto) {
@@ -97,4 +102,23 @@ public class UserServiceImpl implements UserService {
         return user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    public RecipeResponseDto storeRecipe(Long userId, UserDtoReq.RecipeReq requestDto){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+
+        Recipe recipe = Recipe.builder()
+                .title(requestDto.getRecipe().getTitle())
+                .instructions(requestDto.getRecipe().getInstructions())
+                .user(user)
+                .build();
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        return RecipeResponseDto.builder()
+                .title(savedRecipe.getTitle())
+                .instructions(savedRecipe.getInstructions())
+                .build();
+    }
 }
+
+

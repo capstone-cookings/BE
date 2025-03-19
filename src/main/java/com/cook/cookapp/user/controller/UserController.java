@@ -4,6 +4,8 @@ import com.cook.cookapp.apiPayload.ApiResponse;
 import com.cook.cookapp.apiPayload.code.exception.handler.UserHandler;
 import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
+import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
+import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.dto.req.KakaoAccessTokenRequest;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
@@ -16,6 +18,7 @@ import com.cook.cookapp.user.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -126,6 +129,20 @@ public class UserController {
 //
 //        return ApiResponse.onSuccess(new UserProfileResponse(user));
 //    }
+
+
+
+    @Operation(summary = "레시피 저장 API", description = "My 레시피에 레시피를 저장합니다")
+    @PostMapping("/{userId}/recipes")
+    public ApiResponse<RecipeResponseDto> storeRecipe(
+            @PathVariable Long userId,
+            @RequestBody @Valid UserDtoReq.RecipeReq requestDto) {
+
+        RecipeResponseDto responseDto = userService.storeRecipe(userId, requestDto);
+        return ApiResponse.onSuccess(responseDto);
+    }
+
+
 
 
 
