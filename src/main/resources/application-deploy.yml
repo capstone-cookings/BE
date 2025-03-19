@@ -37,7 +37,7 @@ jwt:
 
 kakao:
   client_id: ${KAKAO_ID}
-  redirect_uri: http://refrigerator-env.eba-aatuyi7s.ap-northeast-2.elasticbeanstalk.com/callback
+  redirect_uri: https://api.refrigerator.asia/callback
 
 cloud:
   aws:

@@ -2,32 +2,27 @@ package com.cook.cookapp.user.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
 import com.cook.cookapp.apiPayload.code.exception.handler.UserHandler;
-import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
+import com.cook.cookapp.user.dto.req.KakaoAccessTokenRequest;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
+import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
 import com.cook.cookapp.user.dto.res.UserProfileResponse;
 import com.cook.cookapp.user.entity.User;
-import com.cook.cookapp.user.repository.UserRepository;
+import com.cook.cookapp.user.service.KakaoService;
 import com.cook.cookapp.user.service.UserService;
 import com.cook.cookapp.user.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.cook.cookapp.apiPayload.code.status.ErrorStatus.NICKNAME_DUPLICATION;
-import static com.cook.cookapp.apiPayload.code.status.ErrorStatus.USER_NOT_FOUND;
 
 @RestController
 @RequestMapping("/api/user")
@@ -36,8 +31,16 @@ public class UserController {
     
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
+    private final KakaoService kakaoService;
     private final UserServiceImpl userServiceImpl;
+
+    @PostMapping("/kakao-login")
+    public ApiResponse<UserDtoRes.UserLoginRes> kakaoLogin(@RequestBody KakaoAccessTokenRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        KakaoUserInfoResponseDto userInfo = kakaoService.getUserInfo(request.getAccessToken());
+        User user = userService.kakaoSignup(userInfo);
+        return ApiResponse.onSuccess(userService.kakaoLogin(httpRequest, httpResponse, user));
+    }
+
 
     @Operation(summary = "로그인 API", description = "로그인")
     @PostMapping("/login")
