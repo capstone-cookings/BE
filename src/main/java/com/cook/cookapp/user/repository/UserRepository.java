@@ -1,5 +1,6 @@
 package com.cook.cookapp.user.repository;
 
+import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.entity.User;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNickname(String nickname);
     @Override
     <S extends User> List<S> findAll(Example<S> example);
+    Recipe save(Recipe recipe);
 }

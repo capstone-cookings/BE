@@ -1,5 +1,6 @@
 package com.cook.cookapp.user.service;
 
+import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
@@ -14,4 +15,5 @@ public interface UserService {
     UserDtoRes.UserLoginRes kakaoLogin(HttpServletRequest request, HttpServletResponse response, User user);
     boolean duplicateNickname(String nickname);
     User getUserByNickname(String nickname);
+    RecipeResponseDto storeRecipe(Long userId, UserDtoReq.RecipeReq requestDto);
 }
