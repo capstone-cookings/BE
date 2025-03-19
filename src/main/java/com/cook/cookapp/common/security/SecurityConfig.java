@@ -86,19 +86,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 //        configuration.addAllowedOriginPattern("*"); // 모든 출처 허용 (필요시 특정 도메인으로 변경)
-        // 허용할 Origin 도메인 설정
+        // 허용할 Origin 도메인 설정(앱이라도 swagger사용시 필요)
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8080",
                 "https://localhost:8080",
-                "http://refrigerator-env.eba-aatuyi7s.ap-northeast-2.elasticbeanstalk.com/",
-                "https://refrigerator-env.eba-aatuyi7s.ap-northeast-2.elasticbeanstalk.com/"
-//                ,"http://replendar.site",// 추가 도메인
-//                "https://replendar.site",
-//                "https://*.replendar.site",
-//                "https://api.replendar.site",
-//                "http://api.replendar.site" ,
-//                "http://localhost:5173",
-//                "https://localhost:5173"
+                "https://api.refrigerator.asia",
+                "http://api.refrigerator.asia",
+                "http://*.api.refrigerator.asia"
         ));
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
