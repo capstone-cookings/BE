@@ -16,4 +16,13 @@ public class UserDtoRes {
         private String refreshToken;
         private String nickname;
     }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class UserRecipeRes {
+        private Long id;
+        private String title;
+        private String instructions;
+    }
 }
