@@ -1,6 +1,8 @@
 package com.cook.cookapp.user.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
+import com.cook.cookapp.apiPayload.code.exception.GeneralException;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
@@ -43,7 +45,7 @@ public class KakaoLoginController {
     public Long whoami() {
         Long userIdFromToken = jwtTokenProvider.getUserIdFromToken();
 
-        User user = userRepository.findById(userIdFromToken).orElseThrow(() -> new IllegalArgumentException("유저를 찾지 못했습니다."));
+        User user = userRepository.findById(userIdFromToken).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         //회원가입, 로그인 동시진행
         return user.getId();
     }

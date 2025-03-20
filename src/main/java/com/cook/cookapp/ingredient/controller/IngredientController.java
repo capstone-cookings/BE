@@ -2,12 +2,12 @@ package com.cook.cookapp.ingredient.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
 import com.cook.cookapp.common.security.JwtTokenProvider;
-import com.cook.cookapp.common.validation.ValidPage;
 import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
 import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
-import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import com.cook.cookapp.ingredient.service.IngredientService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +25,7 @@ public class IngredientController {
 
     @Operation(summary = "식재료 등록 API", description = "사용자가 식재료를 저장소에 추가합니다.")
     @PostMapping
-    public ApiResponse<String> addIngredient(@RequestBody IngredientDtoReq ingredientDtoReq) {
+    public ApiResponse<String> addIngredient(@RequestBody @Valid IngredientDtoReq ingredientDtoReq) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         ingredientService.addIngredient(userId, ingredientDtoReq);
         return ApiResponse.onSuccess("식재료가 추가되었습니다.");
@@ -34,7 +34,7 @@ public class IngredientController {
     @Operation(summary = "식재료 전체 조회 (등록 순) API", description = "사용자가 저장한 모든 식재료를 등록 순으로 조회합니다.")
     @GetMapping("/createdAt")
     public ApiResponse<Page<IngredientDtoRes>> getAllIngredientsByCreatedAt(
-            @RequestParam(defaultValue = "1") @ValidPage int page,@PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         return ApiResponse.onSuccess(ingredientService.getAllIngredientsByCreatedAt(userId, adjustedPageable));
@@ -43,7 +43,7 @@ public class IngredientController {
     @Operation(summary = "식재료 전체 조회 (소비기한 순) API", description = "사용자가 저장한 모든 식재료를 소비기한이 빠른 순으로 조회합니다.")
     @GetMapping("/useByDate")
     public ApiResponse<Page<IngredientDtoRes>> getAllIngredientsByUseByDate(
-            @RequestParam(defaultValue = "1") @ValidPage int page,@PageableDefault(size = 10,  sort = "useByDate") Pageable pageable) {
+            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page,@PageableDefault(size = 10,  sort = "useByDate") Pageable pageable) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         return ApiResponse.onSuccess(ingredientService.getAllIngredientsByUseByDate(userId, adjustedPageable));
@@ -59,7 +59,7 @@ public class IngredientController {
 
     @Operation(summary = "식재료 수정 API", description = "사용자가 저장한 특정 식재료의 정보를 수정합니다.")
     @PatchMapping("/{ingredientId}")
-    public ApiResponse<String> updateIngredient(@PathVariable Long ingredientId, @RequestBody IngredientDtoReq ingredientDtoReq) {
+    public ApiResponse<String> updateIngredient(@PathVariable Long ingredientId, @RequestBody @Valid IngredientDtoReq ingredientDtoReq) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         ingredientService.updateIngredient(userId, ingredientId, ingredientDtoReq);
         return ApiResponse.onSuccess("식재료 정보가 수정되었습니다.");

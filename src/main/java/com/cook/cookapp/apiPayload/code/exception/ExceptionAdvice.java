@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.LinkedHashMap;
@@ -26,94 +26,62 @@ import java.util.Optional;
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
-
-    @ExceptionHandler
+    @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
         String errorMessage = e.getConstraintViolations().stream()
                 .map(constraintViolation -> constraintViolation.getMessage())
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
+                .orElse("ConstraintViolationException 발생");
 
-        return handleExceptionInternalConstraint(e, ErrorStatus.valueOf(errorMessage), HttpHeaders.EMPTY,request);
+        return handleSimpleException(e, ErrorStatus.INVALID_PAGE_PARAMETER, request);
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         Map<String, String> errors = new LinkedHashMap<>();
 
         ex.getBindingResult().getFieldErrors()
-                .forEach(fieldError -> {
-                    String fieldName = fieldError.getField();
-                    String errorMessage = Optional.ofNullable(fieldError.getDefaultMessage()).orElse("");
-                    errors.merge(fieldName, errorMessage, (existingErrorMessage, newErrorMessage) -> existingErrorMessage + ", " + newErrorMessage);
-                });
+                .forEach(fieldError -> errors.put(fieldError.getField(),
+                        Optional.ofNullable(fieldError.getDefaultMessage()).orElse("잘못된 입력입니다.")));
 
-        return handleExceptionInternalArgs(ex,HttpHeaders.EMPTY,ErrorStatus.valueOf("_BAD_REQUEST"),request,errors);
+        return handleExceptionWithArgs(ex, ErrorStatus._BAD_REQUEST, request, errors);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Object> exception(Exception e, WebRequest request) {
-        e.printStackTrace();
-
-        return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(),request, e.getMessage());
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleTypeMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
+        if ("page".equals(ex.getName())) {
+            return handleSimpleException(ex, ErrorStatus.INVALID_PAGE_PARAMETER, request);
+        }
+        return handleSimpleException(ex, ErrorStatus._BAD_REQUEST, request);
     }
 
-    @ExceptionHandler(value = GeneralException.class)
-    public ResponseEntity onThrowException(GeneralException generalException, HttpServletRequest request) {
-        ErrorReasonDTO errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
-        return handleExceptionInternal(generalException,errorReasonHttpStatus,null,request);
+    @ExceptionHandler(GeneralException.class)
+    public ResponseEntity<Object> handleGeneralException(GeneralException ex, HttpServletRequest request) {
+        ErrorReasonDTO reason = ex.getErrorReasonHttpStatus();
+        return handleDetailedException(ex, reason, request);
     }
 
-    private ResponseEntity<Object> handleExceptionInternal(Exception e, ErrorReasonDTO reason,
-                                                           HttpHeaders headers, HttpServletRequest request) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleAllExceptions(Exception e, WebRequest request) {
+        log.error("[UNHANDLED EXCEPTION]", e);
+        return handleSimpleException(e, ErrorStatus._INTERNAL_SERVER_ERROR, request);
+    }
 
-        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(),reason.getMessage(),null);
-//        e.printStackTrace();
-
+    private ResponseEntity<Object> handleDetailedException(Exception e, ErrorReasonDTO reason,
+                                                           HttpServletRequest request) {
+        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(), reason.getMessage(), null);
         WebRequest webRequest = new ServletWebRequest(request);
-        return super.handleExceptionInternal(
-                e,
-                body,
-                headers,
-                reason.getHttpStatus(),
-                webRequest
-        );
+        return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, reason.getHttpStatus(), webRequest);
     }
 
-    private ResponseEntity<Object> handleExceptionInternalFalse(Exception e, ErrorStatus errorCommonStatus,
-                                                                HttpHeaders headers, HttpStatus status, WebRequest request, String errorPoint) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorPoint);
-        return super.handleExceptionInternal(
-                e,
-                body,
-                headers,
-                status,
-                request
-        );
+    private ResponseEntity<Object> handleSimpleException(Exception e, ErrorStatus errorStatus, WebRequest request) {
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage(), e.getMessage());
+        return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, errorStatus.getHttpStatus(), request);
     }
 
-    private ResponseEntity<Object> handleExceptionInternalArgs(Exception e, HttpHeaders headers, ErrorStatus errorCommonStatus,
-                                                               WebRequest request, Map<String, String> errorArgs) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorArgs);
-        return super.handleExceptionInternal(
-                e,
-                body,
-                headers,
-                errorCommonStatus.getHttpStatus(),
-                request
-        );
-    }
-
-    private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e, ErrorStatus errorCommonStatus,
-                                                                     HttpHeaders headers, WebRequest request) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(), errorCommonStatus.getMessage(), null);
-        return super.handleExceptionInternal(
-                e,
-                body,
-                headers,
-                errorCommonStatus.getHttpStatus(),
-                request
-        );
+    private ResponseEntity<Object> handleExceptionWithArgs(Exception e, ErrorStatus errorStatus, WebRequest request, Map<String, String> errorArgs) {
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage(), errorArgs);
+        return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, errorStatus.getHttpStatus(), request);
     }
 }

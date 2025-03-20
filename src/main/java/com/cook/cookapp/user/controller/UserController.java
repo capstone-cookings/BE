@@ -1,11 +1,10 @@
 package com.cook.cookapp.user.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
-import com.cook.cookapp.apiPayload.code.exception.handler.UserHandler;
+import com.cook.cookapp.apiPayload.code.exception.GeneralException;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
-import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
-import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.dto.req.KakaoAccessTokenRequest;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
@@ -25,8 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.cook.cookapp.apiPayload.code.status.ErrorStatus.NICKNAME_DUPLICATION;
-
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -37,8 +34,9 @@ public class UserController {
     private final KakaoService kakaoService;
     private final UserServiceImpl userServiceImpl;
 
+    @Operation(summary = "앱 카카오로그인 API", description = "앱에서 카카오 로그인")
     @PostMapping("/kakao-login")
-    public ApiResponse<UserDtoRes.UserLoginRes> kakaoLogin(@RequestBody KakaoAccessTokenRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    public ApiResponse<UserDtoRes.UserLoginRes> kakaoLogin(@RequestBody @Valid KakaoAccessTokenRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         KakaoUserInfoResponseDto userInfo = kakaoService.getUserInfo(request.getAccessToken());
         User user = userService.kakaoSignup(userInfo);
         return ApiResponse.onSuccess(userService.kakaoLogin(httpRequest, httpResponse, user));
@@ -67,14 +65,14 @@ public class UserController {
         String refreshToken = jwtTokenProvider.resolveRefreshToken();
 
         if (refreshToken == null) {
-            return ApiResponse.onFailure("TOKEN_REQUIRED", "리프레시 토큰이 필요합니다.", null);
+            throw new GeneralException(ErrorStatus.JWT_EMPTY);
         }
 
         Long userId = jwtTokenProvider.getUserIdInToken(refreshToken);
 
         // 리프레시 토큰 검증
         if (!jwtTokenProvider.validateRefreshToken(refreshToken, userId)) {
-            return ApiResponse.onFailure("INVALID_TOKEN", "리프레시 토큰이 유효하지 않습니다. 다시 로그인하세요.", null);
+            throw new GeneralException(ErrorStatus.JWT_REFRESHTOKEN_NOT_MATCHED);
         }
 
         // 기존 RefreshToken 무효화 (삭제)
@@ -98,7 +96,7 @@ public class UserController {
         boolean exists = userService.duplicateNickname(nickname);
 
         if (exists) {
-            throw new UserHandler(NICKNAME_DUPLICATION);
+            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATION);
         }
 
         return ApiResponse.onSuccess(SuccessStatus.SUCCESS_GET_NICKNAME);
