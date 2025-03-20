@@ -18,12 +18,4 @@ public class UserDtoReq {
         private String email;
     }
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RecipeReq {
-        Recipe recipe;
-    }
-
-
 }

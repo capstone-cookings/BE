@@ -3,7 +3,8 @@ package com.cook.cookapp.user.service;
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
-import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
+import com.cook.cookapp.recipe.dto.req.RecipeDtoReq;
+import com.cook.cookapp.recipe.dto.res.RecipeDtoRes;
 import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.recipe.repository.RecipeRepository;
 import com.cook.cookapp.user.converter.UserConverter;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,6 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RecipeRepository recipeRepository;
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public UserDtoRes.UserLoginRes login(HttpServletRequest request, HttpServletResponse response, UserDtoReq.LoginReq loginDto) {
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService {
         String email = loginDto.getEmail();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾지 못했습니다."));
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
@@ -100,23 +101,19 @@ public class UserServiceImpl implements UserService {
         return user.orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
     }
 
-    public RecipeResponseDto storeRecipe(Long userId, UserDtoReq.RecipeReq requestDto){
+    public UserDtoRes.UserProfileRes getUserProfileById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-        Recipe recipe = Recipe.builder()
-                .title(requestDto.getRecipe().getTitle())
-                .instructions(requestDto.getRecipe().getInstructions())
-                .user(user)
-                .build();
-
-        Recipe savedRecipe = recipeRepository.save(recipe);
-
-        return RecipeResponseDto.builder()
-                .title(savedRecipe.getTitle())
-                .instructions(savedRecipe.getInstructions())
-                .build();
+        return UserConverter.userProfileRes(user);
     }
+
+    public UserDtoRes.UserProfileRes getUserProfileByNickname(String nickname) {
+        User user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        return UserConverter.userProfileRes(user);
+    }
+
 }
 
 

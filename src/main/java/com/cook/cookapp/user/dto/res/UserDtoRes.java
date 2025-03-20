@@ -1,8 +1,10 @@
 package com.cook.cookapp.user.dto.res;
 
+import com.cook.cookapp.user.entity.ProfileImage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 public class UserDtoRes {
 
@@ -25,4 +27,14 @@ public class UserDtoRes {
         private String title;
         private String instructions;
     }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class UserProfileRes {
+        private String email;
+        private String nickname;
+        private ProfileImage profileImage;
+    }
+
 }
