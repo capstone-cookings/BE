@@ -1,11 +1,10 @@
 package com.cook.cookapp.user.service;
 
-import com.cook.cookapp.common.security.CustomUserDetail;
-import com.cook.cookapp.common.security.CustomUserDetailsService;
+import com.cook.cookapp.apiPayload.code.exception.GeneralException;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
 import com.cook.cookapp.recipe.entity.Recipe;
-import com.cook.cookapp.recipe.entity.RecipeIngredient;
 import com.cook.cookapp.recipe.repository.RecipeRepository;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
@@ -18,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +36,7 @@ public class UserServiceImpl implements UserService {
         String email = loginDto.getEmail();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾지 못했습니다."));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
@@ -93,18 +91,18 @@ public class UserServiceImpl implements UserService {
 
     public User getUserByNickname(String nickname){
         User user = userRepository.findByNickname(nickname)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         return user;
     }
 
     public User getUserById(Long id){
         Optional<User> user = userRepository.findById(id);
-        return user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return user.orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
     }
 
     public RecipeResponseDto storeRecipe(Long userId, UserDtoReq.RecipeReq requestDto){
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         Recipe recipe = Recipe.builder()
                 .title(requestDto.getRecipe().getTitle())
@@ -119,9 +117,6 @@ public class UserServiceImpl implements UserService {
                 .instructions(savedRecipe.getInstructions())
                 .build();
     }
-
-
-
 }
 
 

@@ -5,21 +5,18 @@ import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
 import com.cook.cookapp.recipe.service.RecipeService;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
-import com.cook.cookapp.user.service.KakaoService;
 import com.cook.cookapp.user.service.UserService;
-import com.cook.cookapp.user.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/recipe")
@@ -42,7 +39,7 @@ public class RecipeController {
     @Operation(summary = "레시피 조회 API", description = "My 레시피를 조회합니다")
     @GetMapping("")
     public ResponseEntity<ApiResponse<Page<RecipeResponseDto>>> getRecipe(
-            @RequestParam(defaultValue = "1") int page, // 기본값 1로 설정
+            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, // 기본값 1로 설정
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
