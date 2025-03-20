@@ -1,11 +1,11 @@
 package com.cook.cookapp.user.service;
 
-import com.cook.cookapp.common.security.CustomUserDetail;
-import com.cook.cookapp.common.security.CustomUserDetailsService;
+import com.cook.cookapp.apiPayload.code.exception.GeneralException;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
-import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
+import com.cook.cookapp.recipe.dto.req.RecipeDtoReq;
+import com.cook.cookapp.recipe.dto.res.RecipeDtoRes;
 import com.cook.cookapp.recipe.entity.Recipe;
-import com.cook.cookapp.recipe.entity.RecipeIngredient;
 import com.cook.cookapp.recipe.repository.RecipeRepository;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
@@ -102,25 +102,27 @@ public class UserServiceImpl implements UserService {
         return user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public RecipeResponseDto storeRecipe(Long userId, UserDtoReq.RecipeReq requestDto){
+    public UserDtoRes.UserProfileRes getUserProfileById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-        Recipe recipe = Recipe.builder()
-                .title(requestDto.getRecipe().getTitle())
-                .instructions(requestDto.getRecipe().getInstructions())
-                .user(user)
-                .build();
-
-        Recipe savedRecipe = recipeRepository.save(recipe);
-
-        return RecipeResponseDto.builder()
-                .title(savedRecipe.getTitle())
-                .instructions(savedRecipe.getInstructions())
+        return UserDtoRes.UserProfileRes.builder()
+                .email(user.getEmail())
+                .profileImage(user.getProfileImage())
+                .nickname(user.getNickname())
                 .build();
     }
 
+    public UserDtoRes.UserProfileRes getUserProfileByNickname(String nickname) {
+        User user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
+        return UserDtoRes.UserProfileRes.builder()
+                .email(user.getEmail())
+                .profileImage(user.getProfileImage())
+                .nickname(user.getNickname())
+                .build();
+    }
 
 }
 

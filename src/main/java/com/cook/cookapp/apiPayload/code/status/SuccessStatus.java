@@ -15,7 +15,7 @@ public enum SuccessStatus implements BaseCode {
     SUCCESS_GET_NOTICE_LIST(HttpStatus.OK, "COMMON2001", "공지사항 목록 읽기 성공"),
     SUCCESS_FETCH_NOTICE_UPDATE(HttpStatus.OK, "COMMON2002", "공지사항 수정 성공"),
     SUCCESS_GET_NOTICE(HttpStatus.OK, "COMMON2002", "공지사항 읽기 성공"),
-    SUCCESS_GET_NICKNAME(HttpStatus.OK, "COMMON2002","닉네임 생성이 가능"),
+    NO_DUPLICATE_NICKNAME(HttpStatus.OK, "COMMON2002","닉네임 생성이 가능"),
     SUCCESS_POST_RECIPE(HttpStatus.OK, "COMMON2002", "레시피 저장 완료");
 
 

@@ -1,17 +1,20 @@
-package com.cook.cookapp.user.dto.req;
+package com.cook.cookapp.recipe.dto.req;
 
 import com.cook.cookapp.recipe.entity.Recipe;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class UserDtoReq {
+public class RecipeDtoReq {
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LoginReq {
-        String email;
+    public static class RecipeReq {
+        private String title;
+        private String instructions;
     }
 
+
 }
+

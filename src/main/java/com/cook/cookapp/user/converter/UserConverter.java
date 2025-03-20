@@ -13,4 +13,12 @@ public class UserConverter {
                 .nickname(nickname)
                 .build();
     }
+
+    public static UserDtoRes.UserProfileRes userProfileRes(User user) {
+        return UserDtoRes.UserProfileRes.builder()
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .profileImage(user.getProfileImage())
+                .build();
+    }
 }

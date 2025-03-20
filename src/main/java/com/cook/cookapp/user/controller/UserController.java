@@ -4,13 +4,10 @@ import com.cook.cookapp.apiPayload.ApiResponse;
 import com.cook.cookapp.apiPayload.code.exception.handler.UserHandler;
 import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
-import com.cook.cookapp.recipe.dto.res.RecipeResponseDto;
-import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.dto.req.KakaoAccessTokenRequest;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
-import com.cook.cookapp.user.dto.res.UserProfileResponse;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.service.KakaoService;
 import com.cook.cookapp.user.service.UserService;
@@ -18,7 +15,6 @@ import com.cook.cookapp.user.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -101,23 +97,21 @@ public class UserController {
             throw new UserHandler(NICKNAME_DUPLICATION);
         }
 
-        return ApiResponse.onSuccess(SuccessStatus.SUCCESS_GET_NICKNAME);
+        return ApiResponse.onSuccess(SuccessStatus.NO_DUPLICATE_NICKNAME);
     }
 
     @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile")
-    public ApiResponse<UserProfileResponse> getProfile() {
+    public ApiResponse<UserDtoRes.UserProfileRes> getProfile() {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-
-        User user = userServiceImpl.getUserById(userId);
-        return ApiResponse.onSuccess(UserProfileResponse.fromUser(user));
+        return ApiResponse.onSuccess(userServiceImpl.getUserProfileById(userId));
     }
 
     @Operation(summary = "다른 사용자 프로필 조회 API", description = "다른 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile/other")
-    public ApiResponse<UserProfileResponse> getOtherProfile(@RequestParam String nickname) {
+    public ApiResponse<UserDtoRes.UserProfileRes> getOtherProfile(@RequestParam String nickname) {
         User user = userServiceImpl.getUserByNickname(nickname);
-        return ApiResponse.onSuccess(UserProfileResponse.fromUser(user));
+        return ApiResponse.onSuccess(userServiceImpl.getUserProfileByNickname(user.getNickname()));
     }
 
 //    // 공동구매 커뮤니티 매너 평가로 변경해야 함
