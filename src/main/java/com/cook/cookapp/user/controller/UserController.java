@@ -131,19 +131,4 @@ public class UserController {
 //    }
 
 
-
-    @Operation(summary = "레시피 저장 API", description = "My 레시피에 레시피를 저장합니다")
-    @PostMapping("/{userId}/recipes")
-    public ApiResponse<RecipeResponseDto> storeRecipe(
-            @PathVariable Long userId,
-            @RequestBody @Valid UserDtoReq.RecipeReq requestDto) {
-
-        RecipeResponseDto responseDto = userService.storeRecipe(userId, requestDto);
-        return ApiResponse.onSuccess(responseDto);
-    }
-
-
-
-
-
 }
