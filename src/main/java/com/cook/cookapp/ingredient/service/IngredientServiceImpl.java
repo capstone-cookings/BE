@@ -50,7 +50,7 @@ public class IngredientServiceImpl implements IngredientService{
     @Override
     public void deleteIngredient(Long userId, Long ingredientId) {
         Ingredient ingredient = ingredientRepository.findByIdAndUserId(ingredientId, userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._BAD_REQUEST));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
 
         ingredientRepository.delete(ingredient);
     }
@@ -58,7 +58,7 @@ public class IngredientServiceImpl implements IngredientService{
     @Override
     public void updateIngredient(Long userId, Long ingredientId, IngredientDtoReq ingredientDtoReq) {
         Ingredient ingredient = ingredientRepository.findByIdAndUserId(ingredientId, userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._BAD_REQUEST));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
 
         ingredient.update(ingredientDtoReq);
         ingredientRepository.save(ingredient);
@@ -67,7 +67,7 @@ public class IngredientServiceImpl implements IngredientService{
     @Override
     public void updateAlarmStatus(Long userId, Long ingredientId, boolean alarmStatus) {
         Ingredient ingredient = ingredientRepository.findByIdAndUserId(ingredientId, userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._BAD_REQUEST));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
 
         ingredient.setAlarmStatus(alarmStatus ? AlarmStatus.ON : AlarmStatus.OFF);
         ingredientRepository.save(ingredient);
@@ -76,7 +76,7 @@ public class IngredientServiceImpl implements IngredientService{
     @Override
     public IngredientDtoRes getIngredientById(Long userId, Long ingredientId) {
         Ingredient ingredient = ingredientRepository.findByIdAndUserId(ingredientId, userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._BAD_REQUEST));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
 
         return ingredientConverter.toDto(ingredient);
     }
