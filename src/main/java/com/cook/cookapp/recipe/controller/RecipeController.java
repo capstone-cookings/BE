@@ -1,15 +1,14 @@
 package com.cook.cookapp.recipe.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
+import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
-import com.cook.cookapp.recipe.converter.RecipeConverter;
 import com.cook.cookapp.recipe.dto.req.RecipeDtoReq;
 import com.cook.cookapp.recipe.dto.res.RecipeDtoRes;
-import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.recipe.service.RecipeService;
-import com.cook.cookapp.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,31 +16,28 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/recipe")
 @RequiredArgsConstructor
 public class RecipeController {
-    private final UserService userService;
+
     private final RecipeService recipeService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RecipeConverter recipeConverter;
-
 
     @Operation(summary = "레시피 저장 API", description = "My 레시피에 레시피를 저장합니다")
     @PostMapping("")
-    public ApiResponse<String> storeRecipe(
-            @RequestBody  RecipeDtoReq.RecipeReq requestDto) {
+    public ApiResponse<SuccessStatus> storeRecipe(
+            @RequestBody  @Valid RecipeDtoReq.RecipeReq requestDto) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         recipeService.addRecipe(userId, requestDto);
-        return ApiResponse.onSuccess("레시피 저장에 성공하였습니다");
+        return ApiResponse.onSuccess(SuccessStatus.SUCCESS_POST_RECIPE);
     }
 
     @Operation(summary = "레시피 조회 API", description = "My 레시피를 조회합니다")
     @GetMapping("")
     public ApiResponse<Page<RecipeDtoRes.UserRecipeRes>> getRecipe(
-            @RequestParam(defaultValue = "1") int page, // 기본값 1로 설정
+            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.")int page, // 기본값 1로 설정
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
