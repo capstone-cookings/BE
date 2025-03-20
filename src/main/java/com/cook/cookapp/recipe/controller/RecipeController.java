@@ -12,7 +12,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
@@ -39,11 +42,17 @@ public class RecipeController {
     @Operation(summary = "레시피 조회 API", description = "My 레시피를 조회합니다")
     @GetMapping("")
     public ResponseEntity<ApiResponse<Page<RecipeResponseDto>>> getRecipe(
-            Pageable pageable) {
+            @RequestParam(defaultValue = "1") int page, // 기본값 1로 설정
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        Page<RecipeResponseDto> myRecipes = recipeService.findByUserId(userId, pageable);
+
+        // 1-based index를 0-based로 변환
+        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Page<RecipeResponseDto> myRecipes = recipeService.findByUserId(userId, adjustedPageable);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(myRecipes));
     }
+
 }
