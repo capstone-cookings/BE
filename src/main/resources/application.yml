@@ -11,4 +11,4 @@ spring:
     date-format: yyyy/MM/dd HH:mm
     time-zone: Asia/Seoul
   profiles:
-    active: local # 기본 프로파일 (로컬 환경을 기본으로 설정)
+    active: deploy # 기본 프로파일 (로컬 환경을 기본으로 설정)
