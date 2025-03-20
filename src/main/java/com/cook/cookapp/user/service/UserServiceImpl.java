@@ -30,7 +30,6 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RecipeRepository recipeRepository;
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public UserDtoRes.UserLoginRes login(HttpServletRequest request, HttpServletResponse response, UserDtoReq.LoginReq loginDto) {
@@ -93,35 +92,26 @@ public class UserServiceImpl implements UserService {
 
     public User getUserByNickname(String nickname){
         User user = userRepository.findByNickname(nickname)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         return user;
     }
 
     public User getUserById(Long id){
         Optional<User> user = userRepository.findById(id);
-        return user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return user.orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
     }
 
     public UserDtoRes.UserProfileRes getUserProfileById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-        return UserDtoRes.UserProfileRes.builder()
-                .email(user.getEmail())
-                .profileImage(user.getProfileImage())
-                .nickname(user.getNickname())
-                .build();
+        return UserConverter.userProfileRes(user);
     }
 
     public UserDtoRes.UserProfileRes getUserProfileByNickname(String nickname) {
         User user = userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
-        return UserDtoRes.UserProfileRes.builder()
-                .email(user.getEmail())
-                .profileImage(user.getProfileImage())
-                .nickname(user.getNickname())
-                .build();
+        return UserConverter.userProfileRes(user);
     }
 
 }

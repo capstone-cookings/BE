@@ -2,7 +2,9 @@ package com.cook.cookapp.user.converter;
 
 import com.cook.cookapp.user.dto.res.UserDtoRes;
 import com.cook.cookapp.user.entity.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserConverter {
     public static UserDtoRes.UserLoginRes signInRes(User user, String accessToken, String refreshToken, String nickname) {
         return UserDtoRes.UserLoginRes.builder()
