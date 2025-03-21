@@ -50,10 +50,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         response.setStatus(errorCode.getHttpStatus().value());
         ObjectMapper objectMapper = new ObjectMapper();
 
-        ApiResponse<String> failureResponse = ApiResponse.onFailure(errorCode.getCode(),errorCode.getMessage(),null);
+        ApiResponse<String> failureResponse = ApiResponse.onFailure(errorCode.getCode(),errorCode.getMessage(),errorCode.getMessage());
         String s = objectMapper.writeValueAsString(failureResponse);
 
         response.getWriter().write(s);
-        ApiResponse.onFailure(errorCode.getCode(),errorCode.getMessage(),null);
     }
 }
