@@ -27,11 +27,11 @@ public class RecipeController {
 
     @Operation(summary = "레시피 저장 API", description = "My 레시피에 레시피를 저장합니다")
     @PostMapping("")
-    public ApiResponse<SuccessStatus> storeRecipe(
+    public ApiResponse<String> storeRecipe(
             @RequestBody  @Valid RecipeDtoReq.RecipeReq requestDto) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         recipeService.addRecipe(userId, requestDto);
-        return ApiResponse.onSuccess(SuccessStatus.SUCCESS_POST_RECIPE);
+        return ApiResponse.onSuccess("레시피 저장 완료");
     }
 
     @Operation(summary = "레시피 조회 API", description = "My 레시피를 조회합니다")

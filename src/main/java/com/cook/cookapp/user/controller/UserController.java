@@ -91,14 +91,14 @@ public class UserController {
 
     @Operation(summary = "닉네임 중복 확인 API", description = "닉네임 설정 시 중복을 방지합니다.")
     @GetMapping("/nickname/check")
-    public ApiResponse<SuccessStatus> checkNickname(@RequestParam String nickname) {
+    public ApiResponse<String> checkNickname(@RequestParam String nickname) {
         boolean exists = userService.duplicateNickname(nickname);
 
         if (exists) {
             throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATION);
         }
 
-        return ApiResponse.onSuccess(SuccessStatus.NO_DUPLICATE_NICKNAME);
+        return ApiResponse.onSuccess("닉네임 생성 가능");
     }
 
     @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
