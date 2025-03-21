@@ -42,11 +42,12 @@ public class KakaoLoginController {
 
     @Operation(summary = "로그인한 유저 id 확인하기", description = "test용")
     @PostMapping("whoami")
-    public Long whoami() {
+    public ApiResponse<Long> whoami() {
         Long userIdFromToken = jwtTokenProvider.getUserIdFromToken();
 
-        User user = userRepository.findById(userIdFromToken).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-        //회원가입, 로그인 동시진행
-        return user.getId();
+        User user = userRepository.findById(userIdFromToken)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        return ApiResponse.onSuccess(user.getId());
     }
 }
