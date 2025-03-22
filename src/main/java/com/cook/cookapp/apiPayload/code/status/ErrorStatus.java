@@ -41,8 +41,11 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_PAGE_PARAMETER(HttpStatus.BAD_REQUEST, "PAGE400", "잘못된 페이지 값입니다. 1 이상의 정수로 입력해주세요."),
 
     //식재료
-    INGREDIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "INGREDIENT404", "식재료를 찾을 수 없습니다.");
+    INGREDIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "INGREDIENT404", "식재료를 찾을 수 없습니다."),
 
+    //Chatbot
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "400", "유효하지 않은 입력 값입니다."),
+    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다.");
 
 
 

@@ -39,6 +39,10 @@ public class User extends BaseEntity {
     @Column
     private Long exp;
 
+    //음식 취향
+    @Column(length = 100)
+    private String tastePreference;
+
     //식재료 리스트
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Ingredient> IngredientList = new ArrayList<>();
@@ -48,5 +52,5 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private ProfileImage profileImage;
-
 }
+
