@@ -20,7 +20,7 @@ public class UserConverter {
         return UserDtoRes.UserProfileRes.builder()
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-                .profileImage(user.getProfileImage())
+//                .profileImage(user.getProfileImage())
                 .build();
     }
 }

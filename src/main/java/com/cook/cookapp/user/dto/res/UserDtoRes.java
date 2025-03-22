@@ -34,7 +34,7 @@ public class UserDtoRes {
     public static class UserProfileRes {
         private String email;
         private String nickname;
-        private ProfileImage profileImage;
+//        private ProfileImage profileImage;
     }
 
 }

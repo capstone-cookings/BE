@@ -89,16 +89,19 @@ public class UserController {
         return ApiResponse.onSuccess(tokens);
     }
 
-    @Operation(summary = "닉네임 중복 확인 API", description = "닉네임 설정 시 중복을 방지합니다.")
-    @GetMapping("/nickname/check")
-    public ApiResponse<String> checkNickname(@RequestParam String nickname) {
-        boolean exists = userService.duplicateNickname(nickname);
-
-        if (exists) {
-            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATION);
+    @Operation(summary = "닉네임 생성 API", description = "닉네임을 생성합니다")
+    @PostMapping("/nickname")
+    public ApiResponse<String> addNickname(@RequestParam String nickname) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        if (nickname == null || nickname.trim().isEmpty() || nickname.length() < 2 || nickname.length() > 20) {
+            throw new GeneralException(ErrorStatus.INVALID_NICKNAME);
         }
 
-        return ApiResponse.onSuccess("닉네임 생성 가능");
+        if (userService.duplicateNickname(nickname)) {
+            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATION);
+        }
+        userService.addNickname(userId, nickname);
+        return ApiResponse.onSuccess("닉네임 생성 완료");
     }
 
     @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
