@@ -38,3 +38,7 @@ jwt:
 kakao:
   client_id: ${KAKAO_ID}
   redirect_uri: http://localhost:8080/callback
+
+openai:
+  api-url: https://api.openai.com/v1/chat/completions
+  api-key: Bearer ${OPENAI_SECRET_KEY}

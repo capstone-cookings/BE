@@ -70,13 +70,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
     private ResponseEntity<Object> handleDetailedException(Exception e, ErrorReasonDTO reason,
                                                            HttpServletRequest request) {
-        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(), reason.getMessage(), null);
+        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(), reason.getMessage(), reason.getMessage());
         WebRequest webRequest = new ServletWebRequest(request);
         return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, reason.getHttpStatus(), webRequest);
     }
 
     private ResponseEntity<Object> handleSimpleException(Exception e, ErrorStatus errorStatus, WebRequest request) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage(), e.getMessage());
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage(), errorStatus.getMessage());
         return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, errorStatus.getHttpStatus(), request);
     }
 
