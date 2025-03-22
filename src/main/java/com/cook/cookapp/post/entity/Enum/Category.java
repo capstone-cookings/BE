@@ -1,7 +1,6 @@
-package com.cook.cookapp.post.entity.Enum;
+    package com.cook.cookapp.post.entity.Enum;
 
-public enum Category {
-    vegetable,
-    seafood,
-
-}
+    public enum Category {
+        VEGETABLE,
+        SEAFOOD
+    }

@@ -3,6 +3,7 @@ package com.cook.cookapp.post.service;
 
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
+import com.cook.cookapp.post.converter.PostConverter;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.repository.PostRepository;
 import com.cook.cookapp.user.entity.User;
@@ -19,11 +20,14 @@ import org.springframework.stereotype.Service;
 public class PostServiceImpl implements PostService {
 
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final PostConverter postConverter;
 
     @Override
     public void addPost(Long userId, PostDtoReq postDtoReq) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        postRepository.save(postConverter.toEntity(postDtoReq,user));
     }
 
 }

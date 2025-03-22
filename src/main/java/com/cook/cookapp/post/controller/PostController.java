@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
-    private final PostServiceImpl postServiceI;
+    private final PostServiceImpl postServiceImpl;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "게시글 등록 API", description = "사용자가 게시글을 등록합니다")
     @PostMapping
-    public ApiResponse<String> addIngredient(@RequestBody @Valid PostDtoReq postDtoReq) {
+    public ApiResponse<String> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         postService.addPost(userId, postDtoReq);
         return ApiResponse.onSuccess("게시글을 등록하였습니다");

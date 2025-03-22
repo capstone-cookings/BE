@@ -1,5 +1,6 @@
 package com.cook.cookapp.post.dto.req;
 
+import com.cook.cookapp.post.entity.Enum.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -9,13 +10,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class PostDtoReq {
-    @NotBlank(message = "식재료 이름은 필수입니다.")
-    private String foodName;
-    private Long useByDate;
-    @Positive(message = "수량은 양수여야 합니다.")
-    private int count;
-    @NotNull(message = "저장 유형은 필수입니다.")
-    private boolean storageType;
-    @NotNull(message = "알림 상태는 필수입니다.")
-    private boolean alarmStatus;
+    @NotBlank(message = "제목은 필수입니다.")
+    private String title;
+    @NotBlank(message = "게시글 내용은 필수입니다.")
+    private String content;
+    @NotNull(message = "카테고리는 필수입니다.")
+    private Category category;
+    private int like_count;
+    @Positive(message = "가격은 양수여야 합니다.")
+    private int price;
 }

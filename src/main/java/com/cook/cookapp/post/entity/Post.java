@@ -2,12 +2,12 @@ package com.cook.cookapp.post.entity;
 
 
 import com.cook.cookapp.global.BaseEntity;
+import com.cook.cookapp.post.dto.req.PostDtoReq;
+import com.cook.cookapp.post.entity.Enum.Category;
 import com.cook.cookapp.user.entity.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.LocalDate;
 
 
 @Getter
@@ -22,21 +22,40 @@ public class Post extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //식재료 이름
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Category category = Category.VEGETABLE;
+
     @Column(length = 20, nullable = false)
-    @NotNull
-    private String foodName;
+    private String title;
 
-    //소비기한 (날짜만 사용)
-    @Column
-    private LocalDate useByDate;
+    @Column(length = 500, nullable = false)
+    private String content;
 
-    //수량
     @Column
-    private int count;
+    private int like_count;
+
+    @Column
+    private int price;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    //TODO 사진,위치정보도 적기
+
+    @PrePersist
+    public void prePersist() {
+        if (this.category == null) {
+            this.category = Category.VEGETABLE;
+        }
+    }
+
+    // 게시글 정보 업데이트 메서드
+    public void update(PostDtoReq postDtoReq) {
+        this.price = postDtoReq.getPrice();
+        this.title = postDtoReq.getTitle();
+        this.category = postDtoReq.getCategory();
+        this.content = postDtoReq.getContent();
+    }
 }
