@@ -18,4 +18,5 @@ public interface UserService {
     UserDtoRes.UserProfileRes getUserProfileByNickname(String nickname);
     void updateTastePreference(Long userId, UserDtoReq.TastePreferenceRequest request);
     String getTastePreference(Long userId);
+    void addNickname(Long userId, String nickname);
 }
