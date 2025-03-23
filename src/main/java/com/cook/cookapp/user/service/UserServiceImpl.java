@@ -2,6 +2,7 @@ package com.cook.cookapp.user.service;
 
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
+import com.cook.cookapp.chatbot.util.TastePreferenceValidator;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
@@ -109,11 +110,27 @@ public class UserServiceImpl implements UserService {
         return UserConverter.userProfileRes(user);
     }
 
-    public void addNickname(Long userId, String nickname){
-        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-        user.setNickname(nickname);
+    // 취향 업데이트
+    public void updateTastePreference(Long userId, UserDtoReq.TastePreferenceRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 필터 검증 실행
+        TastePreferenceValidator.validateTastePreference(request.getTastePreference());
+
+        // 검증 후 저장
+        user.setTastePreference(request.getTastePreference());
         userRepository.save(user);
     }
+
+    // 취향 조회
+    public String getTastePreference(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        return user.getTastePreference() != null ? user.getTastePreference() : "";
+    }
+
 
 }
 

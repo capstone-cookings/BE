@@ -128,5 +128,20 @@ public class UserController {
 //        return ApiResponse.onSuccess(new UserProfileResponse(user));
 //    }
 
+    @Operation(summary = "음식 취향을 입력/수정하는 API", description = "입력값 검증 후 저장")
+    @PostMapping("/taste-preference")
+    public ApiResponse<String> updateTastePreference(@RequestBody UserDtoReq.TastePreferenceRequest request) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        userService.updateTastePreference(userId, request);
+        return ApiResponse.onSuccess("취향이 성공적으로 업데이트되었습니다.");
+    }
+
+    @Operation(summary = "음식 취향 조회 API", description = "저장된 음식 취향 값을 반환")
+    @GetMapping("/taste-preference")
+    public ApiResponse<UserDtoRes.TastePreferenceRes> getTastePreference() {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        String tastePreference = userService.getTastePreference(userId);
+        return ApiResponse.onSuccess(new UserDtoRes.TastePreferenceRes(tastePreference));
+    }
 
 }

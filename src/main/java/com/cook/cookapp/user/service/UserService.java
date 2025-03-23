@@ -13,9 +13,9 @@ public interface UserService {
     User kakaoSignup(KakaoUserInfoResponseDto userInfo);
     UserDtoRes.UserLoginRes kakaoLogin(HttpServletRequest request, HttpServletResponse response, User user);
     boolean duplicateNickname(String nickname);
-    void addNickname(Long userId, String nickname);
     User getUserByNickname(String nickname);
     UserDtoRes.UserProfileRes getUserProfileById(Long userId);
     UserDtoRes.UserProfileRes getUserProfileByNickname(String nickname);
-    User getUserById(Long id);
+    void updateTastePreference(Long userId, UserDtoReq.TastePreferenceRequest request);
+    String getTastePreference(Long userId);
 }
