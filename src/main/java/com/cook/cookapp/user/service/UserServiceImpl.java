@@ -131,6 +131,12 @@ public class UserServiceImpl implements UserService {
         return user.getTastePreference() != null ? user.getTastePreference() : "";
     }
 
+    public void addNickname(Long userId, String nickname){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        user.setNickname(nickname);
+        userRepository.save(user);
+    }
+
 
 }
 
