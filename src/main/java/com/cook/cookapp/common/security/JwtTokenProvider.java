@@ -1,13 +1,14 @@
 package com.cook.cookapp.common.security;
 
 
+import com.cook.cookapp.apiPayload.code.exception.GeneralException;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -132,17 +133,23 @@ public class JwtTokenProvider {
 
     // 로그아웃 시 토큰 블랙리스트에 추가
     public void invalidateToken(String token) {
+        // [수정] Bearer 접두사가 붙어 있는 경우 제거
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // 접두사 제거 후 순수 토큰만 저장
+        }
+
         log.info("로그아웃: 토큰 무효화 -> {}", token);
         invalidatedTokens.add(token);
 
-        // 일정 시간이 지나면 블랙리스트에서 자동 삭제 (만료된 토큰 정리)
+        // [기존 유지] 만료 시점에 맞춰 블랙리스트 자동 제거 스케줄러 실행
         long expirationTime = getTokenExpiration(token);
         if (expirationTime > 0) {
+            final String finalToken = token;  // 캡처를 위해 final 변수 사용
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    invalidatedTokens.remove(token);
-                    log.info("만료된 토큰 제거 -> {}", token);
+                    invalidatedTokens.remove(finalToken);
+                    log.info("만료된 토큰 제거 -> {}", finalToken);
                 }
             }, expirationTime);
         }
@@ -158,6 +165,11 @@ public class JwtTokenProvider {
 
     // 토큰 블랙리스트 확인
     public boolean isTokenInvalidated(String token) {
+        // [수정] 검증 시에도 Bearer 접두사가 붙어 있으면 제거하고 비교
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
         return invalidatedTokens.contains(token);
     }
 
@@ -177,6 +189,9 @@ public class JwtTokenProvider {
     // UserId 추출
     public Long getUserIdFromToken() {
         String accessToken = resolveAccessToken();
+        if (accessToken == null || !validateToken(accessToken)) {
+            throw new GeneralException(ErrorStatus.JWT_INVALID);
+        }
         return getUserIdInToken(accessToken);
     }
 

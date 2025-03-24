@@ -34,18 +34,18 @@ public class IngredientController {
     @Operation(summary = "식재료 전체 조회 (등록 순) API", description = "사용자가 저장한 모든 식재료를 등록 순으로 조회합니다.")
     @GetMapping("/createdAt")
     public ApiResponse<Page<IngredientDtoRes>> getAllIngredientsByCreatedAt(
-            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, @PageableDefault(size = 10) Pageable pageable) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize());
         return ApiResponse.onSuccess(ingredientService.getAllIngredientsByCreatedAt(userId, adjustedPageable));
     }
 
     @Operation(summary = "식재료 전체 조회 (소비기한 순) API", description = "사용자가 저장한 모든 식재료를 소비기한이 빠른 순으로 조회합니다.")
     @GetMapping("/useByDate")
     public ApiResponse<Page<IngredientDtoRes>> getAllIngredientsByUseByDate(
-            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page,@PageableDefault(size = 10,  sort = "useByDate") Pageable pageable) {
+            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page,@PageableDefault(size = 10) Pageable pageable) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize());
         return ApiResponse.onSuccess(ingredientService.getAllIngredientsByUseByDate(userId, adjustedPageable));
     }
 
