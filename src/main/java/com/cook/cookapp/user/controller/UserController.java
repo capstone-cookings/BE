@@ -62,6 +62,7 @@ public class UserController {
     @PostMapping("/refresh")
     public ApiResponse<Map<String, String>> refresh(HttpServletRequest request) {
         String refreshToken = jwtTokenProvider.resolveRefreshToken();
+        String accessToken = jwtTokenProvider.resolveAccessToken();
 
         if (refreshToken == null) {
             throw new GeneralException(ErrorStatus.JWT_EMPTY);
@@ -76,6 +77,11 @@ public class UserController {
 
         // 기존 RefreshToken 무효화 (삭제)
         jwtTokenProvider.deleteRefreshToken(userId);
+
+        // 기존 AccessToken 블랙리스트 처리 추가
+        if (accessToken != null) {
+            jwtTokenProvider.invalidateToken(accessToken);
+        }
 
         // 새로운 액세스 토큰 & 리프레시 토큰 발급
         String newAccessToken = jwtTokenProvider.createAccessToken(userId);
