@@ -53,6 +53,6 @@ cloud:
       accessKey: ${AWS_ACCESS_KEY_ID}
       secretKey: ${AWS_SECRET_ACCESS_KEY}
 
-openai:
-  api-url: https://api.openai.com/v1/chat/completions
-  api-key: Bearer ${OPENAI_SECRET_KEY}
+      openai:
+        api-url: https://api.openai.com/v1/chat/completions
+        api-key: Bearer ${OPENAI_SECRET_KEY}

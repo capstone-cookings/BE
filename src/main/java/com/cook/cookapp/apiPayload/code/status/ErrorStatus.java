@@ -36,7 +36,7 @@ public enum ErrorStatus implements BaseErrorCode {
     //User
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4004", "사용자를 찾을 수 없습니다."),
     NICKNAME_DUPLICATION(HttpStatus.BAD_REQUEST, "MEMBER4002", "닉네임 중복입니다"),
-
+    INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4003", "닉네임을 2자 이상, 20자 이하로 작성해주세요"),
     //Page
     INVALID_PAGE_PARAMETER(HttpStatus.BAD_REQUEST, "PAGE400", "잘못된 페이지 값입니다. 1 이상의 정수로 입력해주세요."),
 
