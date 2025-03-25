@@ -2,12 +2,15 @@ package com.cook.cookapp.apiPayload;
 
 
 import com.cook.cookapp.apiPayload.code.BaseCode;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -34,5 +37,9 @@ public class ApiResponse<T> {
     // 실패한 경우 응답 생성
     public static <T> ApiResponse<T> onFailure(String code, String message, T data){
         return new ApiResponse<>(false, code, message, data);
+    }
+
+    public static <T> ApiResponse<T> onFailRefresh(){
+        return new ApiResponse<>(false, ErrorStatus._BAD_REQUEST.getCode(),ErrorStatus._BAD_REQUEST.getMessage(),null);
     }
 }
