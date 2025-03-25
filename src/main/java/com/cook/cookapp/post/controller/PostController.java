@@ -6,7 +6,6 @@ import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.service.PostService;
 import com.cook.cookapp.post.service.PostServiceImpl;
-import com.cook.cookapp.recipe.dto.res.RecipeResDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
