@@ -65,14 +65,14 @@ public class UserController {
         String accessToken = jwtTokenProvider.resolveAccessToken();
 
         if (refreshToken == null) {
-            throw new GeneralException(ErrorStatus.JWT_EMPTY);
+            return ApiResponse.onFailRefresh();
         }
 
         Long userId = jwtTokenProvider.getUserIdInToken(refreshToken);
 
         // 리프레시 토큰 검증
         if (!jwtTokenProvider.validateRefreshToken(refreshToken, userId)) {
-            throw new GeneralException(ErrorStatus.JWT_REFRESHTOKEN_NOT_MATCHED);
+            return ApiResponse.onFailRefresh();
         }
 
         // 기존 RefreshToken 무효화 (삭제)

@@ -1,17 +1,12 @@
 package com.cook.cookapp.post.converter;
 
-import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
-import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
-import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
-import com.cook.cookapp.ingredient.entity.Enum.StorageType;
-import com.cook.cookapp.ingredient.entity.Ingredient;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
+import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.entity.Post;
+import com.cook.cookapp.recipe.dto.res.RecipeResDto;
+import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.entity.User;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
-import java.time.ZoneId;
 
 @Component
 public class PostConverter {
@@ -25,6 +20,17 @@ public class PostConverter {
                 .user(user)
                 .build();
 
+    }
+
+    public PostResDto.UserPostRes toDto(Post post) {
+        return PostResDto.UserPostRes.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .price(post.getPrice())
+                .content(post.getContent())
+                .like_count(post.getLike_count())
+                .category(post.getCategory())
+                .build();
     }
 
 }

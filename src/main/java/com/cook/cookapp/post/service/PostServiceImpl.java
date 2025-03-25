@@ -5,6 +5,8 @@ import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.post.converter.PostConverter;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
+import com.cook.cookapp.post.dto.res.PostResDto;
+import com.cook.cookapp.post.entity.Post;
 import com.cook.cookapp.post.repository.PostRepository;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 @RequiredArgsConstructor
 @Service
@@ -29,5 +32,12 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         postRepository.save(postConverter.toEntity(postDtoReq,user));
     }
+
+    @Override
+    public Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable) {
+        return postRepository.findByUserId(userId, pageable)
+                    .map(postConverter::toDto); // ✅ 내 게시글 조회
+    }
+
 
 }
