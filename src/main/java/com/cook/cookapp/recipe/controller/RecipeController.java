@@ -26,7 +26,7 @@ public class RecipeController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "레시피 저장 API", description = "My 레시피에 레시피를 저장합니다")
-    @PostMapping("")
+    @PostMapping("/")
     public ApiResponse<String> storeRecipe(
             @RequestBody  @Valid RecipeDtoReq.RecipeReq requestDto) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
@@ -35,7 +35,7 @@ public class RecipeController {
     }
 
     @Operation(summary = "레시피 조회 API", description = "My 레시피를 조회합니다")
-    @GetMapping("")
+    @GetMapping("/")
     public ApiResponse<Page<RecipeDtoRes.UserRecipeRes>> getRecipe(
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.")int page, // 기본값 1로 설정
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {

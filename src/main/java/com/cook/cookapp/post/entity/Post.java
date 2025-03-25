@@ -32,8 +32,11 @@ public class Post extends BaseEntity {
     @Column(length = 500, nullable = false)
     private String content;
 
+    @Column(nullable = true)
+    private int likeCount;
+
     @Column
-    private int like_count;
+    private int memberCount;
 
     @Column
     private int price;

@@ -13,9 +13,8 @@ public class RecipeDtoRes {
     @AllArgsConstructor
     @Builder
     public static class UserRecipeRes {
-        private Long id;
+        //TODO 사진 정보
         private String title;
-        private String instructions;
     }
 }
 

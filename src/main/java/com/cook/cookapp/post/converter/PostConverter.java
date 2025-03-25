@@ -14,7 +14,7 @@ public class PostConverter {
                 .title(dto.getTitle())
                 .price(dto.getPrice())
                 .content(dto.getContent())
-                .like_count(dto.getLike_count())
+                .memberCount(dto.getMemberCount())
                 .category(dto.getCategory())
                 .user(user)
                 .build();
@@ -27,7 +27,8 @@ public class PostConverter {
                 .title(post.getTitle())
                 .price(post.getPrice())
                 .content(post.getContent())
-                .like_count(post.getLike_count())
+                .memberCount(post.getMemberCount())
+                .likeCount(post.getLikeCount())
                 .category(post.getCategory())
                 .build();
     }

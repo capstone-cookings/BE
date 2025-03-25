@@ -15,7 +15,8 @@ public class PostResDto {
     public static class UserPostRes {
         private Long id;
         private Category category;
-        private int like_count;
+        private int memberCount;
+        private int likeCount;
         private int price;
         private String title;
         private String content;
