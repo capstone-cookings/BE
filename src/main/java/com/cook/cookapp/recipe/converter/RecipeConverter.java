@@ -17,19 +17,21 @@ import java.time.ZoneId;
 
 @Component
 public class RecipeConverter {
-
-
     public Recipe toEntity(RecipeDtoReq.RecipeReq dto, User user) {
         return Recipe.builder()
                 .title(dto.getTitle())
                 .instructions(dto.getInstructions())
                 .user(user)
                 .build();
+
     }
 
     public RecipeDtoRes.UserRecipeRes toDto(Recipe recipe) {
         return RecipeDtoRes.UserRecipeRes.builder()
+                .id(recipe.getId())
                 .title(recipe.getTitle())
+                .isLiked(recipe.isLiked())
+                .instructions(recipe.getInstructions())
                 .build();
     }
 }

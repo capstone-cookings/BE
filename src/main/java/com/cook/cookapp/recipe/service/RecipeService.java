@@ -10,4 +10,6 @@ public interface RecipeService {
     Page<RecipeDtoRes.UserRecipeRes> findAll(Pageable pageable);
     Page<RecipeDtoRes.UserRecipeRes> findByUserId(Long userId, Pageable pageable);
     void addRecipe(Long userId, RecipeDtoReq.RecipeReq requestDto);
+    boolean likeRecipe(Long userId, Long recipeId);
+    RecipeDtoRes.UserRecipeRes getRecipeById(Long userId,Long recipeId);
 }
