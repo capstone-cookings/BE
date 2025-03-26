@@ -6,6 +6,7 @@ import com.cook.cookapp.recipe.converter.RecipeConverter;
 import com.cook.cookapp.recipe.dto.req.RecipeDtoReq;
 import com.cook.cookapp.recipe.dto.res.RecipeDtoRes;
 import com.cook.cookapp.recipe.entity.Recipe;
+import com.cook.cookapp.recipe.entity.RecipeIngredient;
 import com.cook.cookapp.recipe.repository.RecipeRepository;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
@@ -16,6 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -29,6 +33,7 @@ public class RecipeServiceImpl implements RecipeService {
     public Page<RecipeDtoRes.UserRecipeRes> findAll(Pageable pageable) {
         return recipeRepository.findAll(pageable).map(recipeConverter::toDto);
     }
+
     @Override
     public Page<RecipeDtoRes.UserRecipeRes> findByUserId(Long userId, Pageable pageable) {
         return recipeRepository.findByUserId(userId, pageable)
@@ -38,7 +43,17 @@ public class RecipeServiceImpl implements RecipeService {
     public void addRecipe(Long userId, RecipeDtoReq.RecipeReq requestDto){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
         Recipe recipe = recipeConverter.toEntity(requestDto, user);
+
+        List<RecipeIngredient> recipeIngredients = user.getIngredientList().stream()
+                .map(ingredient -> RecipeIngredient.builder()
+                        .recipe(recipe)
+                        .ingredient(ingredient)
+                        .build())
+                .collect(Collectors.toList());
+
+        recipe.setRecipeIngredients(recipeIngredients);
         recipeRepository.save(recipe);
     }
 

@@ -40,6 +40,4 @@ public class Recipe extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-
-
 }
