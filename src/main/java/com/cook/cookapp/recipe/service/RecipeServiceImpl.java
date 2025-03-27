@@ -66,10 +66,6 @@ public class RecipeServiceImpl implements RecipeService {
 
         // 좋아요 상태 토글
         recipe.setLiked(!recipe.isLiked());
-
-        // 변경 사항 저장
-        recipeRepository.save(recipe);
-
         return recipe.isLiked();
     }
 

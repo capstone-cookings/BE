@@ -1,7 +1,6 @@
 package com.cook.cookapp.recipe.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
-import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.recipe.dto.req.RecipeDtoReq;
 import com.cook.cookapp.recipe.dto.res.RecipeDtoRes;
@@ -35,7 +34,7 @@ public class RecipeController {
     }
 
     @Operation(summary = "레시피 좋아요(toggle) API", description = "My 레시피에 좋아요를 누릅니다")
-    @GetMapping("/like/{recipeId}")
+    @PatchMapping("/like/{recipeId}")
     public ApiResponse<String> likeRecipe(@PathVariable Long recipeId) {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
