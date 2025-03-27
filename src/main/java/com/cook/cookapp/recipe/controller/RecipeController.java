@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/recipe")
 @RequiredArgsConstructor
@@ -48,7 +49,7 @@ public class RecipeController {
     public ApiResponse<RecipeDtoRes.UserRecipeRes> getRecipeById(@PathVariable Long recipeId) {
         //TODO 제목,재료,instructions, 좋아요 여부,사진
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        return ApiResponse.onSuccess(recipeService.getRecipeById(userId,recipeId));
+        return ApiResponse.onSuccess(recipeService.getRecipeById(recipeId,userId));
     }
 
 
