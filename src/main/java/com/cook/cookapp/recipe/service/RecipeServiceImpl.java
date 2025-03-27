@@ -8,8 +8,6 @@ import com.cook.cookapp.recipe.dto.res.RecipeDtoRes;
 import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.recipe.entity.RecipeIngredient;
 import com.cook.cookapp.recipe.repository.RecipeRepository;
-import com.cook.cookapp.user.converter.UserConverter;
-import com.cook.cookapp.user.dto.res.UserDtoRes;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +54,25 @@ public class RecipeServiceImpl implements RecipeService {
         recipe.setRecipeIngredients(recipeIngredients);
         recipeRepository.save(recipe);
     }
+
+    public boolean likeRecipe(Long userId, Long recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.RECIPE_NOT_FOUND));
+
+        // 본인이 등록한 레시피인지 확인
+        if (!recipe.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_ACCESS);
+        }
+
+        // 좋아요 상태 토글
+        recipe.setLiked(!recipe.isLiked());
+        return recipe.isLiked();
+    }
+
+    public RecipeDtoRes.UserRecipeRes getRecipeById(Long userId,Long recipeId){
+        Recipe recipe = recipeRepository.findByIdAndUserId(userId, recipeId).orElseThrow(() -> new GeneralException(ErrorStatus.RECIPE_NOT_FOUND));
+        return recipeConverter.toDto(recipe);
+    }
+
 
 }

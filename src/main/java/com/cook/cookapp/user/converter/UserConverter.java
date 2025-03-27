@@ -18,6 +18,7 @@ public class UserConverter {
 
     public static UserDtoRes.UserProfileRes userProfileRes(User user) {
         return UserDtoRes.UserProfileRes.builder()
+                //TODO 이미지도 해야함
                 .email(user.getEmail())
                 .nickname(user.getNickname())
 //                .profileImage(user.getProfileImage())
