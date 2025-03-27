@@ -30,6 +30,7 @@ public class RecipeConverter {
         return RecipeDtoRes.UserRecipeRes.builder()
                 .id(recipe.getId())
                 .title(recipe.getTitle())
+                .isLiked(recipe.isLiked())
                 .instructions(recipe.getInstructions())
                 .build();
     }

@@ -15,6 +15,7 @@ public class RecipeDtoRes {
     public static class UserRecipeRes {
         private Long id;
         private String title;
+        private boolean isLiked;
         private String instructions;
     }
 }

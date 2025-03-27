@@ -46,6 +46,12 @@ public enum ErrorStatus implements BaseErrorCode {
     //Post
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST4004", "게시글을 찾을 수 없습니다"),
 
+    //Recipe
+    RECIPE_NOT_FOUND(HttpStatus.NOT_FOUND, "RECIPE4004", "레시피를 찾을 수 없습니다"),
+    ALREADY_LIKED_RECIPE(HttpStatus.BAD_REQUEST, "RECIPE4000", "레시피에 이미 좋아요를 눌렀습니다"),
+    NOT_LIKED_YET(HttpStatus.BAD_REQUEST, "RECIPE4000","레시피에 좋아요를 누르지 않았습니다"),
+    UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "RECIPE4001","레시피의 소유자가 아닙니다"),
+
     //Chatbot
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "400", "유효하지 않은 입력 값입니다."),
     OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다.");

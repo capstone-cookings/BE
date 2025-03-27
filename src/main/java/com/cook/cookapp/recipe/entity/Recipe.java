@@ -1,8 +1,6 @@
 package com.cook.cookapp.recipe.entity;
 
 import com.cook.cookapp.global.BaseEntity;
-import com.cook.cookapp.ingredient.entity.Ingredient;
-import com.cook.cookapp.user.entity.ProfileImage;
 import com.cook.cookapp.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +26,9 @@ public class Recipe extends BaseEntity {
     @NotNull
     private String title;
 
+    @Column
+    private boolean isLiked = false;
+
     //레시피 방법
     @Column(length = 500, unique = true)
     private String instructions;
@@ -39,7 +40,6 @@ public class Recipe extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
 
 
 }

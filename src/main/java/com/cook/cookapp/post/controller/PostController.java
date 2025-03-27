@@ -27,7 +27,7 @@ public class PostController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "게시글 등록 API", description = "사용자가 게시글을 등록합니다")
-    @PostMapping("")
+    @PostMapping("/")
     public ApiResponse<String> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         postService.addPost(userId, postDtoReq);
@@ -35,8 +35,8 @@ public class PostController {
     }
 
 
-    @Operation(summary = "게시글 조회 API", description = "사용자의 게시글을 조회합니다")
-    @GetMapping("")
+    @Operation(summary = "내가 쓴 글 조회 API", description = "사용자의 게시글을 조회합니다")
+    @GetMapping("/")
     public ApiResponse<Page<PostResDto.UserPostRes>> getPost(
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.")int page, // 기본값 1로 설정
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
