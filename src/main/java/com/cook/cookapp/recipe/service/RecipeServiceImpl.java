@@ -69,8 +69,8 @@ public class RecipeServiceImpl implements RecipeService {
         return recipe.isLiked();
     }
 
-    public RecipeDtoRes.UserRecipeRes getRecipeById(Long userId,Long recipeId){
-        Recipe recipe = recipeRepository.findByIdAndUserId(userId, recipeId).orElseThrow(() -> new GeneralException(ErrorStatus.RECIPE_NOT_FOUND));
+    public RecipeDtoRes.UserRecipeRes getRecipeById(Long recipeId,Long userId){
+        Recipe recipe = recipeRepository.findByIdAndUserId(recipeId, userId).orElseThrow(() -> new GeneralException(ErrorStatus.RECIPE_NOT_FOUND));
         return recipeConverter.toDto(recipe);
     }
 
