@@ -27,21 +27,41 @@ public class ChatController {
         ChatDtoRes.ChatRoomResponse response = chatService.createChatRoom(userId, request);
         return ApiResponse.of(SuccessStatus._OK, response);
     }
-    @Operation(summary = "채팅방 전체 목록 조회")
-    @GetMapping("/rooms")
-    public ApiResponse<List<ChatDtoRes.ChatRoomResponse>> getAllRooms() {
-        return ApiResponse.of(SuccessStatus._OK, chatService.getAllRooms());
+    @Operation(summary = "참여중인 채팅방 목록 조회 API",description = "사용자가 참여중인 채팅방 목록을 조회합니다.")
+    @GetMapping("/my-rooms")
+    public ApiResponse<List<ChatDtoRes.ChatRoomListItemResponse>> getMyRooms() {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        return ApiResponse.of(SuccessStatus._OK, chatService.getMyChatRooms(userId));
     }
 
-    @Operation(summary = "채팅방 단일 조회")
+    @Operation(summary = "채팅방 단일 조회 API", description = "채팅방의 상세 정보를 조회합니다.")
     @GetMapping("/room/{roomId}")
     public ApiResponse<ChatDtoRes.ChatRoomResponse> getRoom(@PathVariable Long roomId) {
         return ApiResponse.of(SuccessStatus._OK, chatService.getRoomById(roomId));
     }
 
-    @Operation(summary = "채팅방 입장")
+    @Operation(summary = "채팅방 입장 API", description = "사용자가 채팅방에 입장합니다.")
     @PostMapping("/room/{roomId}/join")
     public ApiResponse<ChatDtoRes.ChatRoomResponse> joinRoom(@PathVariable Long roomId) {
-        return ApiResponse.of(SuccessStatus._OK, chatService.joinRoom(roomId));
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        return ApiResponse.of(SuccessStatus._OK, chatService.joinRoom(userId, roomId));
+    }
+
+    @Operation(summary = "채팅 메시지 전송 API", description = "채팅방에 메시지를 저장합니다.")
+    @PostMapping("/room/{roomId}/message")
+    public ApiResponse<ChatDtoRes.ChatMessageResponse> sendMessage(
+            @PathVariable Long roomId,
+            @RequestBody ChatDtoReq.ChatMessageRequest request
+    ) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        return ApiResponse.of(SuccessStatus._OK, chatService.sendMessage(userId, roomId, request));
+    }
+
+    @Operation(summary = "채팅방 입장시 메시지 읽음 처리 API", description = "채팅방에 입장하면 메시지를 읽음 처리합니다.")
+    @PostMapping("/room/{roomId}/read")
+    public ApiResponse<Integer> markMessagesAsRead(@PathVariable Long roomId) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        int readCount = chatService.markMessagesAsRead(userId, roomId);
+        return ApiResponse.of(SuccessStatus._OK, readCount);
     }
 }

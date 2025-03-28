@@ -8,4 +8,9 @@ public class ChatDtoReq {
         private String name; // 채팅방 이름
     }
 
+    @Getter
+    public class ChatMessageRequest {
+        private String content; // 보낼 메시지
+    }
+
 }

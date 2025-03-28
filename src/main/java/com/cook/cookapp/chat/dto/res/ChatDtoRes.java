@@ -29,4 +29,15 @@ public class ChatDtoRes {
         private int unreadCount; //안 읽은 메시지 수
     }
 
+    @Getter
+    @Builder
+    public class ChatMessageResponse {
+        private Long messageId; // 메시지 ID
+        private Long senderId; // 보낸 사람 ID
+        private String senderNickname; // 보낸 사람 닉네임
+        private String content; // 메시지 내용
+        private LocalDateTime sentAt; // 보낸 시간
+        private boolean isRead; // 읽음 여부
+    }
+
 }

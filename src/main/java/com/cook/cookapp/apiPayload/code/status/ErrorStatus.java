@@ -59,7 +59,8 @@ public enum ErrorStatus implements BaseErrorCode {
     OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다."),
 
     // Chat
-    CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4001", "채팅방을 찾을 수 없습니다.");
+    CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4001", "채팅방을 찾을 수 없습니다."),
+    UNAUTHORIZED_CHAT_ACCESS(HttpStatus.FORBIDDEN, "CHAT4002", "해당 채팅방에 접근할 권한이 없습니다.");
 
 
     private final HttpStatus httpStatus;
