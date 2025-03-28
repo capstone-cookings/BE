@@ -75,13 +75,8 @@ public class UserController {
             return ApiResponse.onFailRefresh();
         }
 
-        // 기존 RefreshToken 무효화 (삭제)
-        jwtTokenProvider.deleteRefreshToken(userId);
-
-        // 기존 AccessToken 블랙리스트 처리 추가
-        if (accessToken != null) {
-            jwtTokenProvider.invalidateToken(accessToken);
-        }
+        //  헬퍼 메서드로 로그아웃 처리 간소화
+        jwtTokenProvider.handleLogout(accessToken, refreshToken);
 
         // 새로운 액세스 토큰 & 리프레시 토큰 발급
         String newAccessToken = jwtTokenProvider.createAccessToken(userId);
