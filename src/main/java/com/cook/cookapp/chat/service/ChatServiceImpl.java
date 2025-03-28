@@ -10,7 +10,6 @@ import com.cook.cookapp.chat.entity.ChatRoomParticipant;
 import com.cook.cookapp.chat.repository.ChatMessageRepository;
 import com.cook.cookapp.chat.repository.ChatRoomParticipantRepository;
 import com.cook.cookapp.chat.repository.ChatRoomRepository;
-import com.cook.cookapp.chat.socket.ChatMessageSocketRequest;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -194,13 +193,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatDtoRes.ChatMessageResponse saveWebSocketMessage(ChatMessageSocketRequest request) {
-        ChatMessage message = ChatMessage.create(
-                request.getRoomId(),
-                request.getSenderId(),
-                request.getSenderNickname(),
-                request.getContent()
-        );
+    public ChatDtoRes.ChatMessageResponse saveWebSocketMessage(Long roomId, Long senderId, String senderNickname, String content) {
+        ChatMessage message = ChatMessage.create(roomId, senderId, senderNickname, content);
         ChatMessage saved = chatMessageRepository.save(message);
 
         return ChatDtoRes.ChatMessageResponse.builder()
@@ -212,7 +206,5 @@ public class ChatServiceImpl implements ChatService {
                 .isRead(saved.isRead())
                 .build();
     }
-
-
 }
 

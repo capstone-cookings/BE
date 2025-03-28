@@ -7,7 +7,5 @@ import lombok.Setter;
 @Setter
 public class ChatMessageSocketRequest {
     private Long roomId;
-    private Long senderId;
-    private String senderNickname;
     private String content;
 }

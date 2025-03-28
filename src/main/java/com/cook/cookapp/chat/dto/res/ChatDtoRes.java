@@ -19,7 +19,7 @@ public class ChatDtoRes {
 
     @Getter
     @Builder
-    public class ChatRoomListItemResponse {
+    public static class ChatRoomListItemResponse {
         private Long roomId; // 채팅방 ID
         private String name; //채팅방 이름
         private int currentParticipants; //현재 참여자 수
@@ -32,7 +32,7 @@ public class ChatDtoRes {
 
     @Getter
     @Builder
-    public class ChatMessageResponse {
+    public static class ChatMessageResponse {
         private Long messageId; // 메시지 ID
         private Long senderId; // 보낸 사람 ID
         private String senderNickname; // 보낸 사람 닉네임

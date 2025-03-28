@@ -10,7 +10,7 @@ public class ChatDtoReq {
     }
 
     @Getter
-    public class ChatMessageRequest {
+    public static class ChatMessageRequest {
         private String content; // 보낼 메시지
     }
 

@@ -2,11 +2,16 @@ package com.cook.cookapp.chat.socket;
 
 import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.chat.service.ChatService;
+import com.cook.cookapp.common.security.JwtTokenProvider;
+import com.cook.cookapp.user.entity.User;
+import com.cook.cookapp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+
+import java.security.Principal;
 
 /**
  * WebSocket 메시지 핸들러
@@ -19,15 +24,26 @@ public class ChatMessageHandler {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatService chatService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserService userService;
 
-    @MessageMapping("/chat/message") // /pub/chat/message
-    public void handleChatMessage(ChatMessageSocketRequest request) {
-        log.info("[WebSocket 수신] room: {}, sender: {}, content: {}", request.getRoomId(), request.getSenderId(), request.getContent());
+    @MessageMapping("/chat/message")
+    public void handleChatMessage(ChatMessageSocketRequest request, Principal principal) {
+        // Principal → userId 추출
+        Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
 
-        // 메시지 저장
-        ChatDtoRes.ChatMessageResponse saved = chatService.saveWebSocketMessage(request);
+        // 유저 정보 조회
+        User user = userService.getUserById(userId);
 
-        // 메시지 전송 (해당 채팅방 구독자에게)
-        messagingTemplate.convertAndSend("/sub/chat/room/" + request.getRoomId(), saved);
+        // 서비스 호출
+        ChatDtoRes.ChatMessageResponse response = chatService.saveWebSocketMessage(
+                request.getRoomId(),
+                user.getId(),
+                user.getNickname(),
+                request.getContent()
+        );
+
+        // 메시지 전송
+        messagingTemplate.convertAndSend("/sub/chat/room/" + request.getRoomId(), response);
     }
 }
