@@ -6,6 +6,7 @@ public class ChatDtoReq {
     @Getter
     public static class ChatRoomCreateRequest {
         private String name; // 채팅방 이름
+        private int maxParticipants; // 최대 참여자 수
     }
 
     @Getter

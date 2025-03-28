@@ -13,6 +13,7 @@ public class ChatDtoRes {
         private Long roomId; // 채팅방 ID
         private String name; //채팅방 이름
         private int currentParticipants; //현재 참여자 수
+        private int maxParticipants; //최대 참여자 수
         private boolean isActive; //활성화 여부
     }
 

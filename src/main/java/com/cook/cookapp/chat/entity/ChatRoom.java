@@ -27,12 +27,16 @@ public class ChatRoom extends BaseEntity {
     // 현재 참여자 수 캐싱용
     private int currentParticipants;
 
+    // 최대 인원 수
+    private int maxParticipants;
+
     // === 채팅방 생성 메서드 ===
-    public static ChatRoom create(String name, Long hostUserId) {
+    public static ChatRoom create(String name, Long hostUserId, int maxParticipants) {
         ChatRoom room = new ChatRoom();
         room.name = name;
         room.hostUserId = hostUserId;
-        room.currentParticipants = 1;
+        room.currentParticipants = 1; // 생성자 자동 참여
+        room.maxParticipants = maxParticipants;
         return room;
     }
 

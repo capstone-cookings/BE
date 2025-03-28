@@ -33,7 +33,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ChatDtoRes.ChatRoomResponse createChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request) {
-        ChatRoom chatRoom = ChatRoom.create(request.getName(), userId);
+        ChatRoom chatRoom = ChatRoom.create(request.getName(), userId, request.getMaxParticipants());
         ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
 
         // 생성자 자동 참여 처리
@@ -62,19 +62,36 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ChatDtoRes.ChatRoomResponse joinRoom(Long userId, Long roomId) {
+        // 채팅방이 존재하는지 확인
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
 
-        // 이미 참여한 방이면 중복 등록 방지
-        if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
-            participantRepository.save(new ChatRoomParticipant(userId, roomId));
-            room.increaseParticipants();
+        // 이미 참여 중인지 확인
+        if (participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
+            return ChatDtoRes.ChatRoomResponse.builder()
+                    .roomId(room.getId())
+                    .name(room.getName())
+                    .currentParticipants(room.getCurrentParticipants())
+                    .maxParticipants(room.getMaxParticipants())
+                    .isActive(room.isActive())
+                    .build();
         }
 
+        // 참여 인원이 초과되었는지 확인
+        if (room.getCurrentParticipants() >= room.getMaxParticipants()) {
+            throw new GeneralException(ErrorStatus.CHATROOM_FULL);
+        }
+
+        // 참여 처리
+        participantRepository.save(new ChatRoomParticipant(userId, roomId));
+        room.increaseParticipants();
+
+        // 응답 반환
         return ChatDtoRes.ChatRoomResponse.builder()
                 .roomId(room.getId())
                 .name(room.getName())
                 .currentParticipants(room.getCurrentParticipants())
+                .maxParticipants(room.getMaxParticipants())
                 .isActive(room.isActive())
                 .build();
     }
