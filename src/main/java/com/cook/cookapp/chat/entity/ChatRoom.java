@@ -51,5 +51,6 @@ public class ChatRoom extends BaseEntity {
     public void deactivate() {
         this.isActive = false;
     }
+
 }
 

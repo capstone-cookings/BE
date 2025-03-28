@@ -14,6 +14,6 @@ public interface ChatService {
     ChatDtoRes.ChatMessageResponse sendMessage(Long userId, Long roomId, ChatDtoReq.ChatMessageRequest request);
     int markMessagesAsRead(Long userId, Long roomId);
     ChatDtoRes.ChatMessageResponse saveWebSocketMessage(Long roomId, Long senderId, String senderNickname, String content);
-
+    void exitChatRoom(Long userId, Long roomId);
 }
 

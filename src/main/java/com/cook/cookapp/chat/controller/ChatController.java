@@ -64,4 +64,12 @@ public class ChatController {
         int readCount = chatService.markMessagesAsRead(userId, roomId);
         return ApiResponse.of(SuccessStatus._OK, readCount);
     }
+
+    @Operation(summary = "채팅방 나가기 API", description = "사용자가 채팅방에서 나갑니다.")
+    @DeleteMapping("/room/{roomId}/exit")
+    public ApiResponse<String> exitRoom(@PathVariable Long roomId) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        chatService.exitChatRoom(userId, roomId);
+        return ApiResponse.of(SuccessStatus._OK, "채팅방에서 정상적으로 나갔습니다.");
+    }
 }

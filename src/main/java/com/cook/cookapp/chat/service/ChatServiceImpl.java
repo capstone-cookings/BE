@@ -177,6 +177,7 @@ public class ChatServiceImpl implements ChatService {
                 .isRead(saved.isRead())
                 .build();
     }
+
     @Override
     public int markMessagesAsRead(Long userId, Long roomId) {
         // 채팅방 존재 여부 검증
@@ -206,5 +207,18 @@ public class ChatServiceImpl implements ChatService {
                 .isRead(saved.isRead())
                 .build();
     }
+
+    @Override
+    public void exitChatRoom(Long userId, Long roomId) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+
+        ChatRoomParticipant participant = participantRepository.findByUserIdAndRoomId(userId, roomId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.NOT_PARTICIPANT_CHATROOM));
+
+        participantRepository.delete(participant);
+        room.decreaseParticipants(); // currentParticipants 1 감소
+    }
+
 }
 
