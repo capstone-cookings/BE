@@ -56,9 +56,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //Chatbot
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "400", "유효하지 않은 입력 값입니다."),
-    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다.");
+    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다."),
 
-
+    // Chat
+    CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4001", "채팅방을 찾을 수 없습니다.");
 
 
     private final HttpStatus httpStatus;
