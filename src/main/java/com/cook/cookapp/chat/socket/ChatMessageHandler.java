@@ -46,4 +46,22 @@ public class ChatMessageHandler {
         // 메시지 전송
         messagingTemplate.convertAndSend("/sub/chat/room/" + request.getRoomId(), response);
     }
+
+    @MessageMapping("/chat/read")
+    public void handleReadMessage(ChatReadEventRequest request, Principal principal) {
+        Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
+
+        // 읽음 처리 (DB)
+        int readCount = chatService.markMessagesAsRead(userId, request.getRoomId());
+
+        // 응답용 메시지 생성 (예: userId + roomId + 몇 개 읽었는지)
+        ChatDtoRes.ChatReadEventResponse event = ChatDtoRes.ChatReadEventResponse.builder()
+                .roomId(request.getRoomId())
+                .userId(userId)
+                .readCount(readCount)
+                .build();
+
+        // 읽음 이벤트 broadcast
+        messagingTemplate.convertAndSend("/sub/chat/room/" + request.getRoomId() + "/read", event);
+    }
 }

@@ -41,4 +41,12 @@ public class ChatDtoRes {
         private boolean isRead; // 읽음 여부
     }
 
+    @Getter
+    @Builder
+    public static class ChatReadEventResponse {
+        private Long roomId;
+        private Long userId;
+        private int readCount;
+    }
+
 }
