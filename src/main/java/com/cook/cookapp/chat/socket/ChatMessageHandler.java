@@ -1,6 +1,7 @@
 package com.cook.cookapp.chat.socket;
 
 import com.cook.cookapp.chat.dto.res.ChatDtoRes;
+import com.cook.cookapp.chat.redis.ChatRoomRedisService;
 import com.cook.cookapp.chat.service.ChatService;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.user.entity.User;
@@ -12,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.util.List;
 
 /**
  * WebSocket 메시지 핸들러
@@ -26,6 +28,7 @@ public class ChatMessageHandler {
     private final ChatService chatService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
+    private final ChatRoomRedisService redisService;
 
     @MessageMapping("/chat/message")
     public void handleChatMessage(ChatMessageSocketRequest request, Principal principal) {
@@ -63,5 +66,38 @@ public class ChatMessageHandler {
 
         // 읽음 이벤트 broadcast
         messagingTemplate.convertAndSend("/sub/chat/room/" + request.getRoomId() + "/read", event);
+    }
+
+    @MessageMapping("/chat/enter")
+    public void enterRoom(ChatEnterLeaveRequest request, Principal principal) {
+        Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
+        redisService.enterRoom(request.getRoomId(), userId);
+
+        // 현재 참여자 목록 가져오기
+        List<Long> members = redisService.getMembers(request.getRoomId());
+
+        messagingTemplate.convertAndSend(
+                "/sub/chat/room/" + request.getRoomId() + "/members",
+                ChatRoomMemberListResponse.builder()
+                        .roomId(request.getRoomId())
+                        .memberIds(members)
+                        .build()
+        );
+    }
+
+    @MessageMapping("/chat/leave")
+    public void leaveRoom(ChatEnterLeaveRequest request, Principal principal) {
+        Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
+        redisService.leaveRoom(request.getRoomId(), userId);
+
+        List<Long> members = redisService.getMembers(request.getRoomId());
+
+        messagingTemplate.convertAndSend(
+                "/sub/chat/room/" + request.getRoomId() + "/members",
+                ChatRoomMemberListResponse.builder()
+                        .roomId(request.getRoomId())
+                        .memberIds(members)
+                        .build()
+        );
     }
 }
