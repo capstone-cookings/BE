@@ -7,6 +7,7 @@ import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.chat.entity.ChatMessage;
 import com.cook.cookapp.chat.entity.ChatRoom;
 import com.cook.cookapp.chat.entity.ChatRoomParticipant;
+import com.cook.cookapp.chat.redis.ChatRoomRedisService;
 import com.cook.cookapp.chat.repository.ChatMessageRepository;
 import com.cook.cookapp.chat.repository.ChatRoomParticipantRepository;
 import com.cook.cookapp.chat.repository.ChatRoomRepository;
@@ -30,6 +31,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomParticipantRepository participantRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRedisService chatRoomRedisService;
 
     @Override
     public ChatDtoRes.ChatRoomResponse createChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request) {
@@ -138,15 +140,24 @@ public class ChatServiceImpl implements ChatService {
 
         List<ChatMessage> messages = chatMessageRepository.findByRoomIdOrderBySentAtAsc(roomId);
 
+        // 채팅방 전체 참여자 수 조회
+        int totalParticipants = participantRepository.countByRoomId(roomId);
+
+        // 메시지마다 읽은 인원 수 Redis에서 가져와서 응답 구성
         return messages.stream()
-                .map(msg -> ChatDtoRes.ChatMessageResponse.builder()
-                        .messageId(msg.getId())
-                        .senderId(msg.getSenderId())
-                        .senderNickname(msg.getSenderNickname())
-                        .content(msg.getContent())
-                        .sentAt(msg.getSentAt())
-                        .isRead(msg.isRead()) // 읽음 여부 포함
-                        .build())
+                .map(msg -> {
+                    int readCount = chatRoomRedisService.getReadCount(msg.getId()); // 읽은 사람 수 조회
+                    int unreadCount = totalParticipants - readCount; // 안 읽은 사람 수 계산
+                    return ChatDtoRes.ChatMessageResponse.builder()
+                            .messageId(msg.getId())// 메시지 ID
+                            .senderId(msg.getSenderId())// 보낸 사람 ID
+                            .senderNickname(msg.getSenderNickname()) // 보낸 사람 닉네임
+                            .content(msg.getContent()) // 메시지 내용
+                            .sentAt(msg.getSentAt()) // 보낸 시간
+                            .isRead(msg.isRead() || msg.getSenderId().equals(userId)) // 내가 보낸 건 무조건 읽음 처리
+                            .unreadCount(unreadCount) // 안 읽은 사람 수
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -179,18 +190,30 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public int markMessagesAsRead(Long userId, Long roomId) {
-        // 채팅방 존재 여부 검증
+    public List<ChatMessage> markMessagesAsRead(Long userId, Long roomId) {
+        // 채팅방 존재 확인
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
 
-        // 참여자 권한 확인
+        // 참여자인지 확인
         if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
             throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
         }
 
-        // 읽음 처리
-        return chatMessageRepository.markAllAsReadByUser(userId, roomId);
+        // 내가 안 읽은 메시지 전체 조회
+        List<ChatMessage> unreadMessages = chatMessageRepository
+                .findUnreadMessagesByRoomIdAndUserId(roomId, userId);
+
+        // 하나씩 읽음 처리 + Redis에 기록
+        for (ChatMessage message : unreadMessages) {
+            message.markAsRead(); // DB 업데이트
+            chatRoomRedisService.markAsRead(message.getId(), userId); // Redis에 기록
+        }
+
+        // 변경 내용 저장
+        chatMessageRepository.saveAll(unreadMessages);
+
+        return unreadMessages; // 읽은 메시지 수 반환
     }
 
     @Override
@@ -219,6 +242,24 @@ public class ChatServiceImpl implements ChatService {
         participantRepository.delete(participant);
         room.decreaseParticipants(); // currentParticipants 1 감소
     }
+    // 채팅방 마감
+    @Override
+    public void closeRoom(Long roomId, Long userId) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
 
+        if (!room.getHostUserId().equals(userId)) {
+            throw new GeneralException(ErrorStatus.CHATROOM_NOT_OWNER);
+        }
+
+        room.closeRoom();
+        chatRoomRepository.save(room);
+    }
+    // 채팅방 엔티티 조회
+    @Override
+    public ChatRoom getChatRoomEntity(Long roomId) {
+        return chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+    }
 }
 

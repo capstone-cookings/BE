@@ -61,7 +61,7 @@ public class ChatController {
     @PostMapping("/room/{roomId}/read")
     public ApiResponse<Integer> markMessagesAsRead(@PathVariable Long roomId) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        int readCount = chatService.markMessagesAsRead(userId, roomId);
+        int readCount = chatService.markMessagesAsRead(userId, roomId).size();;
         return ApiResponse.of(SuccessStatus._OK, readCount);
     }
 
@@ -71,5 +71,13 @@ public class ChatController {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         chatService.exitChatRoom(userId, roomId);
         return ApiResponse.of(SuccessStatus._OK, "채팅방에서 정상적으로 나갔습니다.");
+    }
+
+    @Operation(summary = "채팅방 마감")
+    @PostMapping("/room/{roomId}/close")
+    public ApiResponse<String> closeRoom(@PathVariable Long roomId) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        chatService.closeRoom(roomId, userId);
+        return ApiResponse.of(SuccessStatus._OK, "채팅방이 마감되었습니다.");
     }
 }

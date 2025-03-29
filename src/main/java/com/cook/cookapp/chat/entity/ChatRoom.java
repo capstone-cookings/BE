@@ -22,7 +22,7 @@ public class ChatRoom extends BaseEntity {
 
     private Long hostUserId; // 방 만든 사람 ID(userId)
 
-    private boolean isActive = true; // 채팅방 활성화 여부 (나중에 방 종료 등 처리용)
+    private boolean isActive = true; // 채팅방 활성화 여부 ( 방 종료 처리용)
 
     // 현재 참여자 수 캐싱용
     private int currentParticipants;
@@ -48,9 +48,8 @@ public class ChatRoom extends BaseEntity {
         this.currentParticipants = Math.max(0, this.currentParticipants - 1);
     }
 
-    public void deactivate() {
+    public void closeRoom() {
         this.isActive = false;
     }
-
 }
 

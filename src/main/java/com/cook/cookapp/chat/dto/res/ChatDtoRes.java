@@ -38,7 +38,8 @@ public class ChatDtoRes {
         private String senderNickname; // 보낸 사람 닉네임
         private String content; // 메시지 내용
         private LocalDateTime sentAt; // 보낸 시간
-        private boolean isRead; // 읽음 여부
+        private boolean isRead; // 읽음 여부 (나 기준)
+        private int unreadCount; // 안 읽은 사람 수
     }
 
     @Getter
@@ -47,6 +48,13 @@ public class ChatDtoRes {
         private Long roomId;
         private Long userId;
         private int readCount;
+    }
+
+    @Getter
+    @Builder
+    public static class ChatUnreadBroadcast {
+        private Long messageId;
+        private int unreadCount; // 안 읽은 사람 수
     }
 
 }
