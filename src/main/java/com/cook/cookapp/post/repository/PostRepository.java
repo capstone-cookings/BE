@@ -1,7 +1,6 @@
 package com.cook.cookapp.post.repository;
 
 import com.cook.cookapp.post.entity.Post;
-import com.cook.cookapp.recipe.entity.Recipe;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +11,6 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUserId(Long userId, Pageable pageable);
+    Optional<Post> findByIdAndUserId(Long postId, Long userId);
+
 }
