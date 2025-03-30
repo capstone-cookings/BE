@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class PostResDto {
@@ -20,5 +22,27 @@ public class PostResDto {
         private int price;
         private String title;
         private String content;
+        private String timeAgo;
+        private LocalDateTime createdAt;
     }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class SpecPostRes {
+        private Long id;
+        private Category category;
+        private int memberCount;
+        private int likeCount;
+        private int price;
+        private String title;
+        private String content;
+        private String timeAgo;
+        private LocalDateTime createdAt;
+        private String nickname;
+    }
+
+
+
+
 }

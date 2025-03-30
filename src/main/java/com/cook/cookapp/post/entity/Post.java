@@ -58,6 +58,7 @@ public class Post extends BaseEntity {
     public void update(PostDtoReq postDtoReq) {
         this.price = postDtoReq.getPrice();
         this.title = postDtoReq.getTitle();
+        this.memberCount = postDtoReq.getMemberCount();
         this.category = postDtoReq.getCategory();
         this.content = postDtoReq.getContent();
     }
