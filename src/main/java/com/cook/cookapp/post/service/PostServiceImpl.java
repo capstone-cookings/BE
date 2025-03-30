@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
+
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -36,8 +37,19 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable) {
         return postRepository.findByUserId(userId, pageable)
-                    .map(postConverter::toDto); // ✅ 내 게시글 조회
+                    .map(postConverter::toDto);
     }
 
+    @Override
+    public PostResDto.SpecPostRes getPostById(Long postId,Long userId){
+        Post post = postRepository.findByIdAndUserId(postId, userId).orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+        return postConverter.toSpecDto(post);
+    }
+
+    @Override
+    public void updatePost(Long postId, Long userId, PostDtoReq postDtoReq){
+        Post post = postRepository.findByIdAndUserId(postId, userId).orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+        post.update(postDtoReq);
+    }
 
 }

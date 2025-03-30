@@ -3,9 +3,11 @@ package com.cook.cookapp.post.converter;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.entity.Post;
-import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.entity.User;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 @Component
 public class PostConverter {
@@ -22,15 +24,50 @@ public class PostConverter {
     }
 
     public PostResDto.UserPostRes toDto(Post post) {
+        //TODO 위치 정보
         return PostResDto.UserPostRes.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .price(post.getPrice())
-                .content(post.getContent())
                 .memberCount(post.getMemberCount())
+                .timeAgo(calTime(post.getUpdatedAt()))
                 .likeCount(post.getLikeCount())
-                .category(post.getCategory())
                 .build();
+    }
+
+    public PostResDto.SpecPostRes toSpecDto(Post post) {
+        //TODO 등급 설정, 조회수, 위치 정보, 사진
+        return PostResDto.SpecPostRes.builder()
+                .id(post.getId())
+                .nickname(post.getUser().getNickname())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .category(post.getCategory())
+                .price(post.getPrice())
+                .memberCount(post.getMemberCount())
+                .timeAgo(calTime(post.getUpdatedAt()))
+                .likeCount(post.getLikeCount())
+                .build();
+    }
+
+    public static String calTime(LocalDateTime updatedAt) {
+        LocalDateTime now = LocalDateTime.now();
+        Duration duration = Duration.between(updatedAt, now);
+
+        long seconds = duration.getSeconds();
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+
+        if (days > 0) {
+            return days + "일 전";
+        }else if(hours > 0) {
+            return hours + "시간 전";
+        }else if(minutes > 0) {
+            return minutes + "분 전";
+        }else {
+            return "방금 전";
+        }
     }
 
 }
