@@ -128,6 +128,26 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         user.setNickname(nickname);
-        userRepository.save(user);
     }
+
+    public void addLocation(Long userId, UserDtoReq.UserLocationReq request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        user.setDistrict(request.getDistrict());
+        user.setNeighborhood(request.getNeighborhood());
+    }
+
+    public UserDtoRes.UserLocationRes getLocation(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        return UserDtoRes.UserLocationRes.builder()
+                .district(user.getDistrict())
+                .neighborhood(user.getNeighborhood())
+                .build();
+    }
+
+    public void updateNickname(Long userId, String nickname){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        user.setNickname(nickname);
+    }
+
 }

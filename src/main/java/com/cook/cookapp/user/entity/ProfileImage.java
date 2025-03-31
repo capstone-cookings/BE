@@ -28,8 +28,7 @@ public class ProfileImage extends BaseEntity {
     @Column
     private Long fileSize;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @OneToOne(mappedBy = "profileImage")
     private User user;
 
 }

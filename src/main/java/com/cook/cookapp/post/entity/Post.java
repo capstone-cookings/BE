@@ -8,6 +8,8 @@ import com.cook.cookapp.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -41,7 +43,10 @@ public class Post extends BaseEntity {
     @Column
     private int price;
 
-    @ManyToOne
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<LikedPost> likedPosts = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

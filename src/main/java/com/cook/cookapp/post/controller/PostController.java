@@ -39,7 +39,7 @@ public class PostController {
     @GetMapping("")
     public ApiResponse<Page<PostResDto.UserPostRes>> getPost(
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.")int page, // 기본값 1로 설정
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
@@ -56,12 +56,35 @@ public class PostController {
 
     }
 
-    @Operation(summary = "게시글 수정 API", description = "특정 게시글을 수정합니다")
+    @Operation(summary = "게시글 수정 API", description = "게시글을 수정합니다")
     @PatchMapping("/{postId}")
     public ApiResponse<String> modifyPost(@PathVariable Long postId,@RequestBody @Valid PostDtoReq postDtoReq) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         postService.updatePost(postId,userId,postDtoReq);
         return ApiResponse.onSuccess("게시글 수정완료하였습니다");
     }
+
+    @Operation(summary = "게시글 삭제 API", description = "게시글을 삭제합니다")
+    @DeleteMapping("/{postId}")
+    public ApiResponse<String> deletePost(@PathVariable Long postId) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        postService.deletePost(postId,userId);
+        return ApiResponse.onSuccess("게시글 삭제 완료하였습니다");
+    }
+
+    @Operation(summary = "게시글 검색 API", description = "게시글 제목을 기준으로 검색합니다")
+    @GetMapping("/search")
+    public ApiResponse<Page<PostResDto.UserPostRes>> searchPosts(
+            @RequestParam String keyword, // 검색 키워드
+            @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, // 기본값 1로 설정
+            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        // 페이지 번호를 1-based에서 0-based로 변환
+        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        return ApiResponse.onSuccess(postService.searchPosts(keyword, adjustedPageable));
+
+    }
+
 
 }

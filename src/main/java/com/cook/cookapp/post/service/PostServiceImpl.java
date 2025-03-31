@@ -52,4 +52,16 @@ public class PostServiceImpl implements PostService {
         post.update(postDtoReq);
     }
 
+    @Override
+    public void deletePost(Long postId, Long userId){
+        Post post = postRepository.findByIdAndUserId(postId, userId).orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+        postRepository.delete(post);
+    }
+
+    @Override
+    public Page<PostResDto.UserPostRes> searchPosts(String keyword, Pageable pageable){
+        return postRepository.findByTitleContaining(keyword, pageable)
+                .map(postConverter::toDto);
+    }
+
 }
