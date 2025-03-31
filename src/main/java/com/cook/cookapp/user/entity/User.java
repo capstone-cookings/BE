@@ -44,6 +44,14 @@ public class User extends BaseEntity {
     @Column(length = 100)
     private String tastePreference;
 
+    //지역 구/군
+    @Column(length = 20)
+    private String district;
+
+    //지역 동
+    @Column(length = 20)
+    private String neighborhood;
+
     //식재료 리스트
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Ingredient> IngredientList = new ArrayList<>();

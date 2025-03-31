@@ -28,4 +28,13 @@ public class UserDtoReq {
         private String tastePreference;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserLocationReq {
+        private String district;
+        private String neighborhood;
+    }
+
 }
