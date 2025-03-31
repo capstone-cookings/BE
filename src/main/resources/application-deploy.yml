@@ -22,7 +22,7 @@ spring:
 
   data:
     redis:
-      host: {AWS_REDIS_URL}
+      host: ${AWS_REDIS_URL}
       port: 6379
 
   security:
