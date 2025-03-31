@@ -64,14 +64,14 @@ public class UserController {
         String accessToken = jwtTokenProvider.resolveAccessToken();
 
         if (refreshToken == null) {
-            return ApiResponse.onFailRefresh();
+            throw new GeneralException(ErrorStatus.JWT_EMPTY);
         }
 
         Long userId = jwtTokenProvider.getUserIdInToken(refreshToken);
 
         // 리프레시 토큰 검증
         if (!jwtTokenProvider.validateRefreshToken(refreshToken, userId)) {
-            return ApiResponse.onFailRefresh();
+            throw new GeneralException(ErrorStatus.JWT_REFRESHTOKEN_NOT_MATCHED);
         }
 
         //  헬퍼 메서드로 로그아웃 처리 간소화

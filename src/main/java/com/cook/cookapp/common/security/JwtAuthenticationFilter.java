@@ -50,7 +50,6 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
         ApiResponse<String> failureResponse = ApiResponse.onFailure(
                 errorCode.getCode(),
-                errorCode.getMessage(),
                 errorCode.getMessage()
         );
 
