@@ -145,4 +145,9 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    public void updateNickname(Long userId, String nickname){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        user.setNickname(nickname);
+    }
+
 }
