@@ -48,6 +48,9 @@ public enum ErrorStatus implements BaseErrorCode {
     //Post
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST4004", "게시글을 찾을 수 없습니다"),
 
+    //LikedPost
+    LIKED_POST_NOT_FOUND(HttpStatus.NOT_FOUND, "LIKEDPOST4004", "좋아요한 게시글이 없습니다"),
+
     //Recipe
     RECIPE_NOT_FOUND(HttpStatus.NOT_FOUND, "RECIPE4004", "레시피를 찾을 수 없습니다"),
     ALREADY_LIKED_RECIPE(HttpStatus.BAD_REQUEST, "RECIPE4000", "레시피에 이미 좋아요를 눌렀습니다"),

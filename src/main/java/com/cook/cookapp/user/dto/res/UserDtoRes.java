@@ -40,4 +40,12 @@ public class UserDtoRes {
         private String tastePreference;
     }
 
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class UserLocationRes {
+        private String district;
+        private String neighborhood;
+    }
+
 }

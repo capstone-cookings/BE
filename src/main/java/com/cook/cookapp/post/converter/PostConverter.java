@@ -24,9 +24,10 @@ public class PostConverter {
     }
 
     public PostResDto.UserPostRes toDto(Post post) {
-        //TODO 위치 정보
         return PostResDto.UserPostRes.builder()
                 .id(post.getId())
+                .district(post.getUser().getDistrict())
+                .neighborhood(post.getUser().getNeighborhood())
                 .title(post.getTitle())
                 .price(post.getPrice())
                 .memberCount(post.getMemberCount())
@@ -40,6 +41,8 @@ public class PostConverter {
         return PostResDto.SpecPostRes.builder()
                 .id(post.getId())
                 .nickname(post.getUser().getNickname())
+                .district(post.getUser().getDistrict())
+                .neighborhood(post.getUser().getNeighborhood())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory())

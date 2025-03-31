@@ -10,4 +10,5 @@ public interface PostService {
     Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable);
     PostResDto.SpecPostRes getPostById(Long postId,Long userId);
     void updatePost(Long postId, Long userId, PostDtoReq postDtoReq);
+    void deletePost(Long postId, Long userId);
 }

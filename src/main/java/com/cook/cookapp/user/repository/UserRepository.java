@@ -16,5 +16,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNickname(String nickname);
     @Override
     <S extends User> List<S> findAll(Example<S> example);
-    Recipe save(Recipe recipe);
 }
