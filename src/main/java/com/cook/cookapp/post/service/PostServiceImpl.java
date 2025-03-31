@@ -58,4 +58,10 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(post);
     }
 
+    @Override
+    public Page<PostResDto.UserPostRes> searchPosts(String keyword, Pageable pageable){
+        return postRepository.findByTitleContaining(keyword, pageable)
+                .map(postConverter::toDto);
+    }
+
 }

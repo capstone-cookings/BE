@@ -104,6 +104,21 @@ public class UserController {
         return ApiResponse.onSuccess("닉네임 생성 완료");
     }
 
+    @Operation(summary = "닉네임 변경 API", description = "닉네임을 변경합니다")
+    @PatchMapping("/nickname")
+    public ApiResponse<String> updateNickname(@RequestParam String nickname) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        if (nickname == null || nickname.trim().isEmpty() || nickname.length() < 2 || nickname.length() > 20) {
+            throw new GeneralException(ErrorStatus.INVALID_NICKNAME);
+        }
+
+        if (userService.duplicateNickname(nickname)) {
+            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATION);
+        }
+        userService.updateNickname(userId, nickname);
+        return ApiResponse.onSuccess("닉네임 변경 완료");
+    }
+
     @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile")
     public ApiResponse<UserDtoRes.UserProfileRes> getProfile() {
