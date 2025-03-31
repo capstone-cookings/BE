@@ -20,6 +20,11 @@ spring:
       hibernate.format_sql: true
       dialect: org.hibernate.dialect.MySQL8InnoDBDialect
 
+  data:
+    redis:
+      host: {AWS_REDIS_URL}
+      port: 6379
+
   security:
     user:
       name: user

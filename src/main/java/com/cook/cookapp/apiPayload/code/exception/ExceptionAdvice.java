@@ -70,18 +70,18 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
     private ResponseEntity<Object> handleDetailedException(Exception e, ErrorReasonDTO reason,
                                                            HttpServletRequest request) {
-        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(), reason.getMessage(), reason.getMessage());
+        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(), reason.getMessage());
         WebRequest webRequest = new ServletWebRequest(request);
         return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, reason.getHttpStatus(), webRequest);
     }
 
     private ResponseEntity<Object> handleSimpleException(Exception e, ErrorStatus errorStatus, WebRequest request) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage(), errorStatus.getMessage());
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage());
         return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, errorStatus.getHttpStatus(), request);
     }
 
     private ResponseEntity<Object> handleExceptionWithArgs(Exception e, ErrorStatus errorStatus, WebRequest request, Map<String, String> errorArgs) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage(), errorArgs);
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus.getCode(), errorStatus.getMessage());
         return super.handleExceptionInternal(e, body, HttpHeaders.EMPTY, errorStatus.getHttpStatus(), request);
     }
 }
