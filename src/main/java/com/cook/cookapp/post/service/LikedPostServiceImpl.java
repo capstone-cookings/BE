@@ -26,7 +26,7 @@ public class LikedPostServiceImpl implements LikedPostService {
     private final PostConverter postConverter;
 
     @Override
-    public boolean likePost(Long userId, Long postId) {
+    public PostResDto.likedRes likePost(Long userId, Long postId) {
         LikedPost likedPost = likedPostRepository.findByUserIdAndPostId(userId, postId).orElse(null);
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
         if (likedPost == null) {
@@ -40,15 +40,18 @@ public class LikedPostServiceImpl implements LikedPostService {
         } else {
             // 이미 좋아요가 있으면, 해당 좋아요를 삭제하거나 카운트를 조정하는 로직
             likedPostRepository.delete(likedPost);
+            likedPostRepository.flush();
             post.setLikeCount(post.getLikeCount() - 1);
         }
 
         postRepository.save(post);
-        return likedPostRepository.existsByUserIdAndPostId(userId,postId);
+        return PostResDto.likedRes.builder()
+                .liked(likedPostRepository.existsByUserIdAndPostId(userId,postId))
+                .build();
     }
 
     public Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable) {
         return likedPostRepository.findByUserId(userId, pageable)
-                .map(likedPost -> postConverter.toDto(likedPost.getPost())); // Post -> PostResDto.UserPostRes 변환
+                .map(likedPost -> postConverter.toDto(likedPost.getPost()));
     }
 }
