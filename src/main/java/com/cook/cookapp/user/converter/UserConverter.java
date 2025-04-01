@@ -21,7 +21,6 @@ public class UserConverter {
                 //TODO 이미지도 해야함
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-//                .profileImage(user.getProfileImage())
                 .build();
     }
 }
