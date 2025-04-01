@@ -5,6 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface LikedPostService {
-    boolean likePost(Long userId, Long postId);
+    PostResDto.likedRes likePost(Long userId, Long postId);
     Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable adjustedPageable);
 }

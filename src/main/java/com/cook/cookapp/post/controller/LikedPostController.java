@@ -23,11 +23,9 @@ public class LikedPostController {
 
     @Operation(summary = "게시글 좋아요 API", description = "사용자가 게시글에 좋아요를 누릅니다")
     @PatchMapping("{postId}")
-    public ApiResponse<String> likePost(@PathVariable Long postId) {
+    public ApiResponse<PostResDto.likedRes> likePost(@PathVariable Long postId) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        boolean liked = likedPostService.likePost(userId, postId);
-        String message = liked ? "좋아요 등록" : "좋아요 취소";
-        return ApiResponse.onSuccess(message);
+        return ApiResponse.onSuccess(likedPostService.likePost(userId, postId));
     }
 
     @Operation(summary = "좋아요 한 글 조회 API", description = "사용자가 좋아요 한 게시글을 조회합니다")

@@ -46,7 +46,12 @@ public class PostResDto {
         private String neighborhood;
     }
 
-
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class likedRes{
+        private boolean liked;
+    }
 
 
 }

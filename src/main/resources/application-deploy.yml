@@ -46,18 +46,21 @@ kakao:
 
 cloud:
   aws:
-    #    s3:
-    #      path :
-    #        profile : profile
-    #      bucket: ${AWS_S3_BUCKET}
+    s3:
+      path:
+        profile: profile
+      #        post: post
+      #        recipe: recipe
+      bucket: ${AWS_S3_BUCKET}
     region:
       static: ap-northeast-2
     stack:
       auto: false
     credentials:
-      accessKey: ${AWS_ACCESS_KEY_ID}
-      secretKey: ${AWS_SECRET_ACCESS_KEY}
+      accessKey: ${AWS_S3_ACCESS_KEY_ID}
+      secretKey: ${AWS_S3_SECRET_ACCESS_KEY}
 
 openai:
   api-url: https://api.openai.com/v1/chat/completions
   api-key: Bearer ${OPENAI_SECRET_KEY}
+
