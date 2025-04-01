@@ -75,7 +75,7 @@ public class PostController {
     @Operation(summary = "게시글 검색 API", description = "게시글 제목을 기준으로 검색합니다")
     @GetMapping("/search")
     public ApiResponse<Page<PostResDto.UserPostRes>> searchPosts(
-            @RequestParam String keyword, // 검색 키워드
+            @RequestParam(required = false) String keyword, // 검색 키워드
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, // 기본값 1로 설정
             @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
