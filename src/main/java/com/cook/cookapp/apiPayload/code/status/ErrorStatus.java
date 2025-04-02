@@ -59,7 +59,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //Chatbot
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "400", "유효하지 않은 입력 값입니다."),
-    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다.");
+    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다."),
+
+    //ProfileImage
+    FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "FILE4000", "이미지 용량은 5MB이하로 해주세요"),
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST,"FILE4000","이미지 파일만 업로드해주세요" );
 
 
 
