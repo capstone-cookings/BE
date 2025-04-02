@@ -31,6 +31,7 @@ public class AmazonS3Util {
     private final ProfileImageRepository profileImageRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -41,47 +42,61 @@ public class AmazonS3Util {
 //    @Value("${cloud.aws.s3.path.post}")
 //    private String postPath;
 
-    //프로필 이미지 업로드
-    //db에 있는걸 먼저 찾고 s3를 삭제한 후 디비 데이터를 삭제해주시면 됩니다!
     @Transactional
     public String profileImageUpload(MultipartFile multipartFile, Long userId) throws IOException {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-        ProfileImage existingProfileImage = profileImageRepository.findByUser(user);
-
-        // 기존 이미지 삭제
-        if (existingProfileImage != null) {
-            String existingKey = profilePath + "/" + existingProfileImage.getUuid() + "_" + existingProfileImage.getOriginalFilename();
-            amazonS3Client.deleteObject(bucket, existingKey);  // S3에서 삭제
-            profileImageRepository.delete(existingProfileImage);  // DB에서 삭제
-            profileImageRepository.flush();//즉시 DB에 반영
+        String contentType = multipartFile.getContentType();
+        //용량 5MB이하만 받도록 제한
+        if(multipartFile.getSize() > MAX_FILE_SIZE) {
+            throw new GeneralException(ErrorStatus.FILE_TOO_LARGE);
         }
 
-        // 새 이미지 업로드
-        String uuid = UUID.randomUUID().toString();
-        String key = profilePath + "/" + uuid + "_" + multipartFile.getOriginalFilename();
+        //이미지 파일만 받도록 제한
+        if(contentType == null || !contentType.startsWith("image/") ){
+            throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+        } else {
 
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(multipartFile.getSize());
-        metadata.setContentType(multipartFile.getContentType());
-        // S3에 업로드
-        amazonS3Client.putObject(bucket, key, multipartFile.getInputStream(), metadata);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-        // DB에 새 프로필 이미지 정보 저장
-        ProfileImage newProfileImage = ProfileImage.builder()
-                .uuid(uuid)
-                .originalFilename(multipartFile.getOriginalFilename())
-                .contentType(multipartFile.getContentType())
-                .fileSize(multipartFile.getSize())
-                .user(user)
-                .build();
+            ProfileImage existingProfileImage = profileImageRepository.findByUser(user);
 
-        user.setProfileImage(newProfileImage);
-        userRepository.save(user);
-        profileImageRepository.save(newProfileImage);
+            // 기존 이미지 삭제
+            if (existingProfileImage != null) {
+                user.setProfileImage(null);
+                userRepository.save(user);
+                String existingKey = profilePath + "/" + existingProfileImage.getUuid() + "_" + existingProfileImage.getOriginalFilename();
+                amazonS3Client.deleteObject(bucket, existingKey);  // S3에서 삭제
+                profileImageRepository.delete(existingProfileImage);  // DB에서 삭제
+                profileImageRepository.flush();//즉시 DB에 반영
+            }
 
-        return amazonS3Client.getUrl(bucket, key).toString();
+
+            // 새 이미지 업로드
+            String uuid = UUID.randomUUID().toString();
+            String key = profilePath + "/" + uuid + "_" + multipartFile.getOriginalFilename();
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getSize());
+            metadata.setContentType(multipartFile.getContentType());
+            // S3에 업로드
+            amazonS3Client.putObject(bucket, key, multipartFile.getInputStream(), metadata);
+
+            // DB에 새 프로필 이미지 정보 저장
+            ProfileImage newProfileImage = ProfileImage.builder()
+                    .uuid(uuid)
+                    .originalFilename(multipartFile.getOriginalFilename())
+                    .contentType(multipartFile.getContentType())
+                    .fileSize(multipartFile.getSize())
+                    .user(user)
+                    .build();
+
+            user.setProfileImage(newProfileImage);
+            userRepository.save(user);
+            profileImageRepository.save(newProfileImage);
+
+            return amazonS3Client.getUrl(bucket, key).toString();
+        }
     }
 
     //프로필 이미지 url 가져오기

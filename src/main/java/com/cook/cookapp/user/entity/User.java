@@ -62,7 +62,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Post> postList = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(name = "profileImage_id")
     private ProfileImage profileImage;
 }
