@@ -1,5 +1,6 @@
 package com.cook.cookapp.post.converter;
 
+import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.entity.Post;
@@ -11,6 +12,12 @@ import java.time.LocalDateTime;
 
 @Component
 public class PostConverter {
+    private final AmazonS3Util amazonS3Util;
+
+    public PostConverter(AmazonS3Util amazonS3Util) {
+        this.amazonS3Util = amazonS3Util;
+    }
+
     public Post toEntity(PostDtoReq dto, User user) {
         return Post.builder()
                 .title(dto.getTitle())
@@ -24,7 +31,7 @@ public class PostConverter {
     }
 
     public PostResDto.UserPostRes toDto(Post post) {
-        return PostResDto.UserPostRes.builder()
+        PostResDto.UserPostRes userPostRes = PostResDto.UserPostRes.builder()
                 .id(post.getId())
                 .district(post.getUser().getDistrict())
                 .neighborhood(post.getUser().getNeighborhood())
@@ -34,11 +41,12 @@ public class PostConverter {
                 .timeAgo(calTime(post.getUpdatedAt()))
                 .likeCount(post.getLikeCount())
                 .build();
+        userPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
+        return userPostRes;
     }
 
     public PostResDto.SpecPostRes toSpecDto(Post post) {
-        //TODO 등급 설정, 조회수, 위치 정보, 사진
-        return PostResDto.SpecPostRes.builder()
+        PostResDto.SpecPostRes specPostRes = PostResDto.SpecPostRes.builder()
                 .id(post.getId())
                 .nickname(post.getUser().getNickname())
                 .district(post.getUser().getDistrict())
@@ -51,6 +59,9 @@ public class PostConverter {
                 .timeAgo(calTime(post.getUpdatedAt()))
                 .likeCount(post.getLikeCount())
                 .build();
+        specPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
+        //TODO 등급 설정, 조회수
+        return specPostRes;
     }
 
     public static String calTime(LocalDateTime updatedAt) {

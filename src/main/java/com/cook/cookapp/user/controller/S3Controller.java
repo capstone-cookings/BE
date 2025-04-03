@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/s3")
@@ -31,11 +32,21 @@ public class S3Controller {
 
     @Operation(summary = "레시피 이미지 업로드 API", description = "레시피 이미지를 업로드 합니다.")
     @PostMapping(value = "/update-recipe/{recipeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<String> updateRecipeImage(@RequestPart("recipeImage") MultipartFile recipeImage, @RequestParam Long recipeId) throws IOException {
+    public ApiResponse<String> updateRecipeImage(@RequestPart("recipeImage") MultipartFile recipeImage, @PathVariable Long recipeId) throws IOException {
         Long userId = jwtTokenProvider.getUserIdFromToken();
 
         String imageUrl = amazonS3Util.recipeImageUpload(recipeImage, recipeId, userId);
 
         return ApiResponse.onSuccess(imageUrl);
+    }
+
+    @Operation(summary = "게시글 이미지 업로드 API", description = "게시글 이미지를 업로드 합니다.")
+    @PostMapping(value = "/update-post/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<List<String>> updateRecipeImage(@RequestPart("postImage") List<MultipartFile> postImages, @PathVariable Long postId) throws IOException {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+
+        List<String> imageUrls = amazonS3Util.postImageUpload(postImages, postId, userId);
+
+        return ApiResponse.onSuccess(imageUrls);
     }
 }

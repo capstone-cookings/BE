@@ -4,6 +4,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
+import com.cook.cookapp.post.entity.Post;
+import com.cook.cookapp.post.entity.PostImage;
+import com.cook.cookapp.post.repository.PostImageRepository;
 import com.cook.cookapp.post.repository.PostRepository;
 import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.recipe.entity.RecipeImage;
@@ -29,6 +32,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -43,6 +47,7 @@ public class AmazonS3Util {
     final long MAX_FILE_SIZE = 5 * 1024 * 1024;
     private final RecipeImageRepository recipeImageRepository;
     private final RecipeRepository recipeRepository;
+    private final PostImageRepository postImageRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -53,8 +58,8 @@ public class AmazonS3Util {
     @Value("${cloud.aws.s3.path.recipe}")
     private String recipePath;
 
-//    @Value("${cloud.aws.s3.path.post}")
-//    private String postPath;
+    @Value("${cloud.aws.s3.path.post}")
+    private String postPath;
 
     //프로필 이미지 업로드
     //db에 있는걸 먼저 찾고 s3를 삭제한 후 디비 데이터를 삭제해주시면 됩니다!
@@ -139,6 +144,8 @@ public class AmazonS3Util {
                 recipeRepository.save(recipe);
                 String existingKey = recipePath + "/" + existingRecipeImage.getUuid() + "_" + existingRecipeImage.getOriginalFilename();
                 amazonS3Client.deleteObject(bucket, existingKey);  // S3에서 삭제
+                recipeImageRepository.delete(existingRecipeImage);  // DB에서 삭제
+                recipeImageRepository.flush();
             }
 
 
@@ -168,6 +175,58 @@ public class AmazonS3Util {
         }
     }
 
+    @Transactional
+    public List<String> postImageUpload(List<MultipartFile> multipartFiles, Long postId, Long userId) throws IOException {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+
+        // 기존 이미지 삭제
+        List<PostImage> existingImages = postImageRepository.findByPost(post);
+        for (PostImage existingImage : existingImages) {
+            post.setPostImage(null);
+            postRepository.save(post);
+            String existingKey = postPath + "/" + existingImage.getUuid() + "_" + existingImage.getOriginalFilename();
+            amazonS3Client.deleteObject(bucket, existingKey);
+            postImageRepository.delete(existingImage);
+            postImageRepository.flush();
+        }
+
+        List<String> uploadedImageUrls = new ArrayList<>();
+
+        for (MultipartFile multipartFile : multipartFiles) {
+            String contentType = multipartFile.getContentType();
+            if (multipartFile.getSize() > MAX_FILE_SIZE) {
+                throw new GeneralException(ErrorStatus.FILE_TOO_LARGE);
+            }
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+            }
+
+            String uuid = UUID.randomUUID().toString();
+            String key = postPath + "/" + uuid + "_" + multipartFile.getOriginalFilename();
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getSize());
+            metadata.setContentType(multipartFile.getContentType());
+            amazonS3Client.putObject(bucket, key, multipartFile.getInputStream(), metadata);
+
+            PostImage newPostImage = PostImage.builder()
+                    .uuid(uuid)
+                    .originalFilename(multipartFile.getOriginalFilename())
+                    .contentType(multipartFile.getContentType())
+                    .fileSize(multipartFile.getSize())
+                    .post(post)
+                    .build();
+
+            postImageRepository.save(newPostImage);
+            uploadedImageUrls.add(amazonS3Client.getUrl(bucket, key).toString());
+        }
+
+        return uploadedImageUrls;
+    }
+
+
+
     //프로필 이미지 url 가져오기
     public String getProfilePath(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다."));
@@ -189,6 +248,22 @@ public class AmazonS3Util {
 
         return amazonS3.getUrl(bucket, recipePath + "/" + recipeImage.getUuid() + "_" + recipeImage.getOriginalFilename()).toString();
     }
+
+    public List<String> getPostPath(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+
+        List<PostImage> postImages = postImageRepository.findByPost(post);
+
+        if (postImages == null || postImages.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return postImages.stream()
+                .map(image -> amazonS3.getUrl(bucket, postPath + "/" + image.getUuid() + "_" + image.getOriginalFilename()).toString())
+                .collect(Collectors.toList());
+    }
+
 
     //    // MultipartFile 을 전달받아 File 로 전환한 후 S3에 업로드
     public String upload(MultipartFile multipartFile, String path, ProfileImage uuid) throws IOException {
@@ -268,6 +343,31 @@ public class AmazonS3Util {
             throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
         }
     }
+
+    public void deletePostImages(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
+        }
+
+        for (String imageUrl : imageUrls) {
+            try {
+                // URL에서 S3 Key 추출
+                String fileKey = extractFileKeyFromUrl(imageUrl);
+
+                // 한글이 포함된 경우 URL 디코딩 적용
+                fileKey = URLDecoder.decode(fileKey, StandardCharsets.UTF_8.name());
+                System.out.println("🗑 삭제할 S3 파일 경로 (디코딩 적용): " + fileKey);
+
+                // S3에서 삭제
+                amazonS3Client.deleteObject(bucket, fileKey);
+            } catch (UnsupportedEncodingException e) {
+                throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
+            }
+        }
+    }
+
+
+
 
 
 }
