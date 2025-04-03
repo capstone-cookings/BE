@@ -26,12 +26,11 @@ public class RecipeConverter {
 
     }
 
-    public RecipeDtoRes.UserRecipeRes toDto(Recipe recipe) {
-        return RecipeDtoRes.UserRecipeRes.builder()
+    public RecipeDtoRes.MyRecipeRes toDto(Recipe recipe) {
+        return RecipeDtoRes.MyRecipeRes.builder()
                 .id(recipe.getId())
                 .title(recipe.getTitle())
                 .isLiked(recipe.isLiked())
-                .instructions(recipe.getInstructions())
                 .build();
     }
 }
