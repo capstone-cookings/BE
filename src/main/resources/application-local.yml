@@ -54,7 +54,7 @@ cloud:
     s3:
       path:
         profile: profile
-#        post: post
+        post: post
         recipe: recipe
       bucket: ${AWS_S3_BUCKET}
     region:

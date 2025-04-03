@@ -50,6 +50,9 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToMany(mappedBy = "post",cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PostImage> postImage;
+
     //TODO 사진,위치정보도 적기
 
     @PrePersist
