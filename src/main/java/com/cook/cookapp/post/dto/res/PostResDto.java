@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -26,6 +27,7 @@ public class PostResDto {
 //        private LocalDateTime createdAt;
         private String district;
         private String neighborhood;
+        private List<String> imageUrls;
     }
 
     @Data
@@ -44,6 +46,7 @@ public class PostResDto {
         private String nickname;
         private String district;
         private String neighborhood;
+        private List<String> imageUrls;
     }
 
     @Data
