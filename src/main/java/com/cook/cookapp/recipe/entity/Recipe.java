@@ -1,6 +1,7 @@
 package com.cook.cookapp.recipe.entity;
 
 import com.cook.cookapp.global.BaseEntity;
+import com.cook.cookapp.recipe.dto.req.RecipeDtoReq;
 import com.cook.cookapp.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -34,12 +35,19 @@ public class Recipe extends BaseEntity {
     private String instructions;
 
     //재료들
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeIngredient> recipeIngredients = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JoinColumn(name = "recipeImage_id")
+    private RecipeImage recipeImage;
 
+    public void update(RecipeDtoReq.RecipeReq recipeReq) {
+        this.title = recipeReq.getTitle();
+        this.instructions = recipeReq.getInstructions();
+    }
 }

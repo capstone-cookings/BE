@@ -55,7 +55,7 @@ cloud:
       path:
         profile: profile
 #        post: post
-#        recipe: recipe
+        recipe: recipe
       bucket: ${AWS_S3_BUCKET}
     region:
       static: ap-northeast-2

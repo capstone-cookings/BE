@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Recipe save(Recipe recipe);
     Page<Recipe> findByUserId(Long userId, Pageable pageable);
-
+    Recipe findByUserId(Long userId);
     Optional<Recipe> findByIdAndUserId(Long recipeId, Long userId);
 }
