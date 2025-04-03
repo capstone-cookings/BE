@@ -54,11 +54,6 @@ public class ChatMessageHandler {
             int readCount = chatRoomRedisService.getReadCount(messageId);
             int unreadCount = totalParticipants - readCount;
 
-            // 내가 보낸 메시지는 unreadCount = 0 처리
-            if (message.getSenderId().equals(userId)) {
-                unreadCount = 0;
-            }
-
             ChatDtoRes.ChatUnreadBroadcast payload = ChatDtoRes.ChatUnreadBroadcast.builder()
                     .messageId(messageId)
                     .unreadCount(unreadCount)

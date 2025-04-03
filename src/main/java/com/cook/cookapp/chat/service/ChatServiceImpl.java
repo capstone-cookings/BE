@@ -14,6 +14,7 @@ import com.cook.cookapp.chat.repository.ChatRoomRepository;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRoomParticipantRepository participantRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRedisService chatRoomRedisService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public ChatDtoRes.ChatRoomResponse createChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request) {
@@ -46,6 +48,7 @@ public class ChatServiceImpl implements ChatService {
                 .name(savedRoom.getName())
                 .currentParticipants(savedRoom.getCurrentParticipants())
                 .isActive(savedRoom.isActive())
+                .maxParticipants(savedRoom.getMaxParticipants())
                 .build();
     }
 
@@ -67,6 +70,11 @@ public class ChatServiceImpl implements ChatService {
         // 채팅방이 존재하는지 확인
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+
+        // 마감된 방이면 입장 불가
+        if (!room.isActive()) {
+            throw new GeneralException(ErrorStatus.CHATROOM_CLOSED);
+        }
 
         // 이미 참여 중인지 확인
         if (participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
@@ -172,6 +180,11 @@ public class ChatServiceImpl implements ChatService {
             throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
         }
 
+        // 채팅방 활성화 여부 확인
+        if (!room.isActive()) {
+            throw new GeneralException(ErrorStatus.CHATROOM_CLOSED);
+        }
+
         User user = userService.getUserById(userId);
         String nickname = user.getNickname();
 
@@ -200,14 +213,27 @@ public class ChatServiceImpl implements ChatService {
             throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
         }
 
-        // 내가 안 읽은 메시지 전체 조회
-        List<ChatMessage> unreadMessages = chatMessageRepository
-                .findUnreadMessagesByRoomIdAndUserId(roomId, userId);
+        // 방에 있는 모든 유저 ID 목록 (unreadCount 계산용)
+        List<Long> roomUserIds = participantRepository.findUserIdsByRoomId(roomId);
 
-        // 하나씩 읽음 처리 + Redis에 기록
+        List<ChatMessage> unreadMessages = chatMessageRepository
+                .findByRoomIdOrderBySentAtAsc(roomId).stream()
+                .filter(msg -> !msg.getSenderId().equals(userId))
+                .filter(msg -> !chatRoomRedisService.hasRead(msg.getId(), userId))
+                .toList();
+
         for (ChatMessage message : unreadMessages) {
             message.markAsRead(); // DB 업데이트
-            chatRoomRedisService.markAsRead(message.getId(), userId); // Redis에 기록
+            chatRoomRedisService.markAsRead(message.getId(), userId); // Redis 기록
+
+            //  unreadCount 계산
+            int unreadCount = chatRoomRedisService.getUnreadCount(message.getId(), roomUserIds);
+
+            //  브로드캐스트 전송
+            messagingTemplate.convertAndSend(
+                    "/sub/chat/room/" + roomId + "/unread",
+                    ChatDtoRes.UnreadCountResponse.of(message.getId(), unreadCount)
+            );
         }
 
         // 변경 내용 저장
@@ -221,13 +247,21 @@ public class ChatServiceImpl implements ChatService {
         ChatMessage message = ChatMessage.create(roomId, senderId, senderNickname, content);
         ChatMessage saved = chatMessageRepository.save(message);
 
+        // 총 참여자 수 - 보낸 사람 = unreadCount
+        int totalParticipants = participantRepository.countByRoomId(roomId);
+        int unreadCount = Math.max(totalParticipants - 1, 0); // 최소 0 보장
+
+        // Redis에 보낸 사람은 읽은 걸로 기록
+        chatRoomRedisService.markAsRead(saved.getId(), senderId);
+
         return ChatDtoRes.ChatMessageResponse.builder()
                 .messageId(saved.getId())
                 .senderId(saved.getSenderId())
                 .senderNickname(saved.getSenderNickname())
                 .content(saved.getContent())
                 .sentAt(saved.getSentAt())
-                .isRead(saved.isRead())
+                .unreadCount(unreadCount)
+                .isRead(true) // 보낸 사람은 무조건 읽음 처리
                 .build();
     }
 

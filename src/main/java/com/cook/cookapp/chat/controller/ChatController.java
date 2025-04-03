@@ -80,4 +80,12 @@ public class ChatController {
         chatService.closeRoom(roomId, userId);
         return ApiResponse.of(SuccessStatus._OK, "채팅방이 마감되었습니다.");
     }
+
+    @Operation(summary = "채팅 메시지 목록 조회 API", description = "특정 채팅방의 메시지 목록을 조회합니다.")
+    @GetMapping("/room/{roomId}/messages")
+    public ApiResponse<List<ChatDtoRes.ChatMessageResponse>> getMessages(@PathVariable Long roomId) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        return ApiResponse.of(SuccessStatus._OK, chatService.getMessagesByRoomId(userId, roomId));
+    }
+
 }

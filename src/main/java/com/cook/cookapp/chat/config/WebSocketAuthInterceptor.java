@@ -8,6 +8,8 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,11 +23,9 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        // STOMP 헤더 파싱
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (accessor == null) return message;
 
-        // 연결 요청 또는 메시지 전송 시
         if (accessor.getCommand() != null) {
             List<String> authHeaders = accessor.getNativeHeader("Authorization");
 
@@ -33,8 +33,12 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                 String bearerToken = authHeaders.get(0);
                 String token = bearerToken.startsWith("Bearer ") ? bearerToken.substring(7) : bearerToken;
 
-                // JWT 검증 및 SecurityContext 등록
-                if (jwtTokenProvider.processTokenAndSetAuthContext(token)) {
+                if (jwtTokenProvider.validateToken(token) && !jwtTokenProvider.isTokenInvalidated(token)) {
+                    Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    accessor.setUser(authentication); // 중요!
+
                     log.info("[WebSocket 인증 성공] userId={}", jwtTokenProvider.getUserIdInToken(token));
                 } else {
                     log.warn("[WebSocket 인증 실패] 잘못된 토큰");
@@ -44,4 +48,5 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
         return message;
     }
+
 }
