@@ -13,4 +13,5 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
     Page<Ingredient> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
     Page<Ingredient> findByUserIdOrderByUseByDateAsc(Long userId, Pageable pageable);
     Optional<Ingredient> findByIdAndUserId(Long ingredientId, Long userId);
+    Optional<Ingredient> findByFoodName(String name);
 }
