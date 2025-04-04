@@ -70,6 +70,12 @@ public class ChatMessageHandler {
     public void handleChatMessage(ChatMessageSocketRequest request, Principal principal) {
         Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
         User user = userService.getUserById(userId);
+        Long roomId = request.getRoomId();
+
+        // 참여자 권한 확인
+        if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
+        }
 
         // 마감된 방인지 체크
         ChatRoom room = chatService.getChatRoomEntity(request.getRoomId());
