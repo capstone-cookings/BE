@@ -3,7 +3,6 @@ package com.cook.cookapp.common;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,8 +19,8 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
-    @Value("${spring.data.redis.password}")
-    private String password;
+//    @Value("${spring.data.redis.password}")
+//    private String password;
 
     /**
      * JWT 전용 RedisTemplate 설정
@@ -31,7 +30,7 @@ public class RedisConfig {
     public RedisTemplate<String, Object> jwtRedisTemplate() {
         // 0번 DB 설정
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
-        config.setPassword(RedisPassword.of(password));
+//        config.setPassword(RedisPassword.of(password));
         config.setDatabase(0); // 0번 DB 사용
 
         // Lettuce 연결
@@ -55,7 +54,7 @@ public class RedisConfig {
     @Bean(name = "chatRedisTemplate")
     public StringRedisTemplate chatRedisTemplate() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
-        config.setPassword(RedisPassword.of(password));
+//        config.setPassword(RedisPassword.of(password));
         config.setDatabase(1); //  1번 DB 사용!
 
         LettuceConnectionFactory factory = new LettuceConnectionFactory(config);

@@ -88,4 +88,10 @@ public class ChatController {
         return ApiResponse.of(SuccessStatus._OK, chatService.getMessagesByRoomId(userId, roomId));
     }
 
+    @GetMapping("/room/{roomId}/participants")
+    public ApiResponse<List<ChatDtoRes.ChatRoomMemberListResponse>> getParticipants(@PathVariable Long roomId) {
+        return ApiResponse.of(SuccessStatus._OK, chatService.getRoomParticipants(roomId));
+    }
+
+
 }

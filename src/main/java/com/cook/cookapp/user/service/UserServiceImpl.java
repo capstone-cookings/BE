@@ -4,6 +4,7 @@ import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.chatbot.util.TastePreferenceValidator;
 import com.cook.cookapp.common.security.JwtTokenProvider;
+import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    private final AmazonS3Util amazonS3Util;
 
     // 일반 로그인 처리: 이메일로 유저 찾고 토큰 발급
     public UserDtoRes.UserLoginRes login(HttpServletRequest request, HttpServletResponse response, UserDtoReq.LoginReq loginDto) {
@@ -91,10 +93,15 @@ public class UserServiceImpl implements UserService {
 
     // 사용자 프로필 조회 (ID 기준)
     public UserDtoRes.UserProfileRes getUserProfileById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-        return UserConverter.userProfileRes(user);
+        String imageUrl = amazonS3Util.getProfilePath(userId);
+
+        return UserDtoRes.UserProfileRes.builder()
+                .imageUrl(imageUrl)
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .build();
     }
 
     // 사용자 프로필 조회 (닉네임 기준)
@@ -102,7 +109,14 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-        return UserConverter.userProfileRes(user);
+        String imageUrl = amazonS3Util.getProfilePath(user.getId());
+
+        return UserDtoRes.UserProfileRes.builder()
+                .imageUrl(imageUrl)
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .build();
+
     }
 
     // 음식 취향 업데이트 (입력값 검증 포함)
@@ -128,6 +142,26 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         user.setNickname(nickname);
-        userRepository.save(user);
     }
+
+    public void addLocation(Long userId, UserDtoReq.UserLocationReq request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        user.setDistrict(request.getDistrict());
+        user.setNeighborhood(request.getNeighborhood());
+    }
+
+    public UserDtoRes.UserLocationRes getLocation(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        return UserDtoRes.UserLocationRes.builder()
+                .district(user.getDistrict())
+                .neighborhood(user.getNeighborhood())
+                .build();
+    }
+
+    public void updateNickname(Long userId, String nickname){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        user.setNickname(nickname);
+    }
+
 }

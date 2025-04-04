@@ -19,5 +19,6 @@ public interface ChatService {
     void exitChatRoom(Long userId, Long roomId);
     void closeRoom(Long roomId, Long userId);
     ChatRoom getChatRoomEntity(Long roomId);
+    List<ChatDtoRes.ChatRoomMemberListResponse> getRoomParticipants(Long roomId);
 }
 

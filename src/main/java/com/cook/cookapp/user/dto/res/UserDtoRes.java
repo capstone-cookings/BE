@@ -31,13 +31,21 @@ public class UserDtoRes {
     public static class UserProfileRes {
         private String email;
         private String nickname;
-//        private ProfileImage profileImage;
+        private String imageUrl;
     }
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TastePreferenceRes {
         private String tastePreference;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class UserLocationRes {
+        private String district;
+        private String neighborhood;
     }
 
 }

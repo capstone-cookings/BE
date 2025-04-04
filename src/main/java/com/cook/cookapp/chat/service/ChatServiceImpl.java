@@ -11,7 +11,9 @@ import com.cook.cookapp.chat.redis.ChatRoomRedisService;
 import com.cook.cookapp.chat.repository.ChatMessageRepository;
 import com.cook.cookapp.chat.repository.ChatRoomParticipantRepository;
 import com.cook.cookapp.chat.repository.ChatRoomRepository;
+import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.user.entity.User;
+import com.cook.cookapp.user.repository.UserRepository;
 import com.cook.cookapp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -32,6 +34,8 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomParticipantRepository participantRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final AmazonS3Util amazonS3Util;
+    private final UserRepository userRepository;
     private final ChatRoomRedisService chatRoomRedisService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -319,5 +323,26 @@ public class ChatServiceImpl implements ChatService {
         return chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
     }
-}
 
+    // 채팅방 참여자 목록 조회
+    @Override
+    public List<ChatDtoRes.ChatRoomMemberListResponse> getRoomParticipants(Long roomId) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+
+        List<ChatRoomParticipant> participants = participantRepository.findAllByRoomId(roomId);
+        List<Long> userIds = participants.stream()
+                .map(ChatRoomParticipant::getUserId)
+                .toList();
+
+        List<User> users = userRepository.findAllById(userIds);
+
+        return users.stream()
+                .map(user -> {
+                    String imageUrl = amazonS3Util.getProfilePath(user.getId()); // S3 경로 가져오기
+                    boolean isHost = user.getId().equals(room.getHostUserId());
+                    return ChatDtoRes.ChatRoomMemberListResponse.of(user.getNickname(), imageUrl, isHost);
+                })
+                .toList();
+    }
+}

@@ -19,5 +19,8 @@ public interface UserService {
     void updateTastePreference(Long userId, UserDtoReq.TastePreferenceRequest request);
     String getTastePreference(Long userId);
     void addNickname(Long userId, String nickname);
+    void addLocation(Long userId, UserDtoReq.UserLocationReq request);
+    UserDtoRes.UserLocationRes getLocation(Long userId);
+    void updateNickname(Long userId, String nickname);
     User getUserById(Long id);
 }

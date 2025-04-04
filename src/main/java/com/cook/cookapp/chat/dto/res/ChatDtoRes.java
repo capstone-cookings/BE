@@ -59,4 +59,11 @@ public class ChatDtoRes {
         private int unreadCount;
     }
 
+    @Getter
+    @AllArgsConstructor(staticName = "of")
+    public class ChatRoomMemberListResponse {
+        private String nickname;
+        private String imageUrl; // 프로필 이미지 URL
+        private boolean isHost; // 방장 여부
+    }
 }

@@ -31,7 +31,6 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoService kakaoService;
-    private final UserServiceImpl userServiceImpl;
 
     @Operation(summary = "앱 카카오로그인 API", description = "앱에서 카카오 로그인")
     @PostMapping("/kakao-login")
@@ -65,14 +64,14 @@ public class UserController {
         String accessToken = jwtTokenProvider.resolveAccessToken();
 
         if (refreshToken == null) {
-            return ApiResponse.onFailRefresh();
+            throw new GeneralException(ErrorStatus.JWT_EMPTY);
         }
 
         Long userId = jwtTokenProvider.getUserIdInToken(refreshToken);
 
         // 리프레시 토큰 검증
         if (!jwtTokenProvider.validateRefreshToken(refreshToken, userId)) {
-            return ApiResponse.onFailRefresh();
+            throw new GeneralException(ErrorStatus.JWT_REFRESHTOKEN_NOT_MATCHED);
         }
 
         //  헬퍼 메서드로 로그아웃 처리 간소화
@@ -105,18 +104,33 @@ public class UserController {
         return ApiResponse.onSuccess("닉네임 생성 완료");
     }
 
+    @Operation(summary = "닉네임 변경 API", description = "닉네임을 변경합니다")
+    @PatchMapping("/nickname")
+    public ApiResponse<String> updateNickname(@RequestParam String nickname) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        if (nickname == null || nickname.trim().isEmpty() || nickname.length() < 2 || nickname.length() > 20) {
+            throw new GeneralException(ErrorStatus.INVALID_NICKNAME);
+        }
+
+        if (userService.duplicateNickname(nickname)) {
+            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATION);
+        }
+        userService.updateNickname(userId, nickname);
+        return ApiResponse.onSuccess("닉네임 변경 완료");
+    }
+
     @Operation(summary = "로그인된 사용자 프로필 조회 API", description = "현재 로그인된 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile")
     public ApiResponse<UserDtoRes.UserProfileRes> getProfile() {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        return ApiResponse.onSuccess(userServiceImpl.getUserProfileById(userId));
+        return ApiResponse.onSuccess(userService.getUserProfileById(userId));
     }
 
     @Operation(summary = "다른 사용자 프로필 조회 API", description = "다른 사용자의 프로필을 조회합니다.")
     @GetMapping("/profile/other")
     public ApiResponse<UserDtoRes.UserProfileRes> getOtherProfile(@RequestParam String nickname) {
-        User user = userServiceImpl.getUserByNickname(nickname);
-        return ApiResponse.onSuccess(userServiceImpl.getUserProfileByNickname(user.getNickname()));
+        User user = userService.getUserByNickname(nickname);
+        return ApiResponse.onSuccess(userService.getUserProfileByNickname(user.getNickname()));
     }
 
 //    // 공동구매 커뮤니티 매너 평가로 변경해야 함
@@ -128,6 +142,21 @@ public class UserController {
 //
 //        return ApiResponse.onSuccess(new UserProfileResponse(user));
 //    }
+
+    @Operation(summary = "동네 위치 저장 API", description = "사용자의 위치를 저장합니다")
+    @PostMapping("/location")
+    public ApiResponse<String> addLocation(@RequestBody UserDtoReq.UserLocationReq request) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        userService.addLocation(userId,request);
+        return ApiResponse.onSuccess("동네 인증 성공하였습니다");
+    }
+
+    @Operation(summary = "동네 위치 불러오기 API", description = "사용자의 위치를 불러옵니다")
+    @GetMapping("/location")
+    public ApiResponse<UserDtoRes.UserLocationRes> getLocation() {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        return ApiResponse.onSuccess(userService.getLocation(userId));
+    }
 
     @Operation(summary = "음식 취향을 입력/수정하는 API", description = "입력값 검증 후 저장")
     @PostMapping("/taste-preference")

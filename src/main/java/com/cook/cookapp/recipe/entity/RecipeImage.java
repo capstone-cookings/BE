@@ -1,7 +1,8 @@
-package com.cook.cookapp.user.entity;
+package com.cook.cookapp.recipe.entity;
 
 
 import com.cook.cookapp.global.BaseEntity;
+import com.cook.cookapp.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProfileImage extends BaseEntity {
+public class RecipeImage extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +29,7 @@ public class ProfileImage extends BaseEntity {
     @Column
     private Long fileSize;
 
-    @OneToOne(mappedBy = "profileImage")
-    private User user;
+    @OneToOne(mappedBy = "recipeImage")
+    private Recipe recipe;
 
 }

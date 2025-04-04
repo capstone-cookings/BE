@@ -15,5 +15,5 @@ public interface ChatRoomParticipantRepository extends JpaRepository<ChatRoomPar
     int countByRoomId(Long roomId);
     @Query("SELECT p.userId FROM ChatRoomParticipant p WHERE p.roomId = :roomId")
     List<Long> findUserIdsByRoomId(@Param("roomId") Long roomId);
-
+    List<ChatRoomParticipant> findAllByRoomId(Long roomId);
 }
