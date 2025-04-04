@@ -213,6 +213,11 @@ public class ChatServiceImpl implements ChatService {
             throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
         }
 
+        // 채팅방 활성화 여부 확인
+        if (!room.isActive()) {
+            throw new GeneralException(ErrorStatus.CHATROOM_CLOSED);
+        }
+
         // 방에 있는 모든 유저 ID 목록 (unreadCount 계산용)
         List<Long> roomUserIds = participantRepository.findUserIdsByRoomId(roomId);
 
@@ -273,9 +278,21 @@ public class ChatServiceImpl implements ChatService {
         ChatRoomParticipant participant = participantRepository.findByUserIdAndRoomId(userId, roomId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.NOT_PARTICIPANT_CHATROOM));
 
+        if (userId.equals(room.getHostUserId())) {
+            room.closeRoom(); // DB 플래그 설정
+            chatRoomRepository.save(room);
+
+            // Redis 키 정리
+            List<Long> messageIds = chatMessageRepository.findIdsByRoomId(roomId);
+            for (Long mid : messageIds) {
+                chatRoomRedisService.deleteReadKey(mid);
+            }
+        }
+
         participantRepository.delete(participant);
         room.decreaseParticipants(); // currentParticipants 1 감소
     }
+
     // 채팅방 마감
     @Override
     public void closeRoom(Long roomId, Long userId) {
@@ -288,7 +305,14 @@ public class ChatServiceImpl implements ChatService {
 
         room.closeRoom();
         chatRoomRepository.save(room);
+
+        // Redis 키 정리
+        List<Long> messageIds = chatMessageRepository.findIdsByRoomId(roomId);
+        for (Long mid : messageIds) {
+            chatRoomRedisService.deleteReadKey(mid);
+        }
     }
+
     // 채팅방 엔티티 조회
     @Override
     public ChatRoom getChatRoomEntity(Long roomId) {

@@ -56,4 +56,9 @@ public class ChatRoomRedisService {
         Long readCount = redisTemplate.opsForSet().size(key);
         return (int) (allUserIds.size() - (readCount != null ? readCount : 0));
     }
+
+    // Redis에서 해당 메시지Id 키 삭제
+    public void deleteReadKey(Long messageId) {
+        redisTemplate.delete("chat:read:" + messageId);
+    }
 }

@@ -19,8 +19,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     // 해당 채팅방의 전체 메시지를 시간순으로 조회
     List<ChatMessage> findByRoomIdOrderBySentAtAsc(Long roomId);
 
-    @Query("SELECT m FROM ChatMessage m WHERE m.roomId = :roomId AND m.senderId != :userId AND m.isRead = false")
-    List<ChatMessage> findUnreadMessagesByRoomIdAndUserId(@Param("roomId") Long roomId, @Param("userId") Long userId);
-
+    // 메시지 ID만 조회 (roomId 기준)
+    @Query("select m.id from ChatMessage m where m.roomId = :roomId")
+    List<Long> findIdsByRoomId(@Param("roomId") Long roomId);
 }
 
