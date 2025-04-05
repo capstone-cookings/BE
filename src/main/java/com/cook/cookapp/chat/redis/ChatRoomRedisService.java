@@ -33,12 +33,6 @@ public class ChatRoomRedisService {
         }
     }
 
-    // 해당 메시지를 읽은 사람 수 반환
-    public int getReadCount(Long messageId) {
-        Long size = redisTemplate.opsForSet().size(key(messageId));
-        return size != null ? size.intValue() : 0;
-    }
-
     // 해당 메시지를 읽은 사용자가 있는지 확인
     public boolean hasRead(Long messageId, Long userId) {
         String key = getReadKey(messageId);
@@ -60,5 +54,10 @@ public class ChatRoomRedisService {
     // Redis에서 해당 메시지Id 키 삭제
     public void deleteReadKey(Long messageId) {
         redisTemplate.delete("chat:read:" + messageId);
+    }
+
+    // Redis에서 해당 메시지Id 키에 저장된 사용자 삭제
+    public void removeReadUser(Long messageId, Long userId) {
+        redisTemplate.opsForSet().remove("chat:read:" + messageId, userId.toString());
     }
 }

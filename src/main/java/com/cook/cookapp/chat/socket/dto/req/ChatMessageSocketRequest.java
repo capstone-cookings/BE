@@ -1,4 +1,4 @@
-package com.cook.cookapp.chat.socket;
+package com.cook.cookapp.chat.socket.dto.req;
 
 import lombok.Getter;
 import lombok.Setter;

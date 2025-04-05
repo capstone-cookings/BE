@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatNotification {
-
+//BaseEntity를 상속은 구현할 때 고민해보기.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

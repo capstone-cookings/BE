@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,8 +50,8 @@ public class ChatServiceImpl implements ChatService {
                 .roomId(savedRoom.getId())
                 .name(savedRoom.getName())
                 .currentParticipants(savedRoom.getCurrentParticipants())
-                .isActive(savedRoom.isActive())
                 .maxParticipants(savedRoom.getMaxParticipants())
+                .isActive(savedRoom.isActive())
                 .build();
     }
 
@@ -65,6 +64,7 @@ public class ChatServiceImpl implements ChatService {
                 .roomId(room.getId())
                 .name(room.getName())
                 .currentParticipants(room.getCurrentParticipants())
+                .maxParticipants(room.getMaxParticipants())
                 .isActive(room.isActive())
                 .build();
     }
@@ -130,9 +130,10 @@ public class ChatServiceImpl implements ChatService {
                     .roomId(room.getId())
                     .name(room.getName())
                     .currentParticipants(room.getCurrentParticipants())
-                    .lastMessage(lastMessage != null ? lastMessage.getContent() : "(아직 메시지가 없습니다)")
+                    .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
                     .lastMessageTime(lastMessage != null ? lastMessage.getSentAt() : null)
                     .unreadCount(unreadCount)
+                    .isActive(room.isActive())
                     .build());
         }
 
@@ -151,15 +152,13 @@ public class ChatServiceImpl implements ChatService {
         }
 
         List<ChatMessage> messages = chatMessageRepository.findByRoomIdOrderBySentAtAsc(roomId);
+        // 참여자 Id 목록
+        List<Long> roomUserIds = participantRepository.findUserIdsByRoomId(roomId);
 
-        // 채팅방 전체 참여자 수 조회
-        int totalParticipants = participantRepository.countByRoomId(roomId);
-
-        // 메시지마다 읽은 인원 수 Redis에서 가져와서 응답 구성
+        // 메시지마다 안읽은 인원 수 Redis에서 가져와서 응답 구성
         return messages.stream()
                 .map(msg -> {
-                    int readCount = chatRoomRedisService.getReadCount(msg.getId()); // 읽은 사람 수 조회
-                    int unreadCount = totalParticipants - readCount; // 안 읽은 사람 수 계산
+                    int unreadCount = chatRoomRedisService.getUnreadCount(msg.getId(), roomUserIds);// 안 읽은 사람 수
                     return ChatDtoRes.ChatMessageResponse.builder()
                             .messageId(msg.getId())// 메시지 ID
                             .senderId(msg.getSenderId())// 보낸 사람 ID
@@ -170,7 +169,7 @@ public class ChatServiceImpl implements ChatService {
                             .unreadCount(unreadCount) // 안 읽은 사람 수
                             .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -282,17 +281,28 @@ public class ChatServiceImpl implements ChatService {
         ChatRoomParticipant participant = participantRepository.findByUserIdAndRoomId(userId, roomId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.NOT_PARTICIPANT_CHATROOM));
 
-        if (userId.equals(room.getHostUserId())) {
-            room.closeRoom(); // DB 플래그 설정
-            chatRoomRepository.save(room);
+        boolean isHostUser = userId.equals(room.getHostUserId());
 
-            // Redis 키 정리
-            List<Long> messageIds = chatMessageRepository.findIdsByRoomId(roomId);
-            for (Long mid : messageIds) {
+        // Redis 메시지 정리 공통 처리
+        List<Long> messageIds = chatMessageRepository.findIdsByRoomId(roomId);
+        for (Long mid : messageIds) {
+            if (isHostUser) {
+                // 방장 → Redis 키 전체 삭제
                 chatRoomRedisService.deleteReadKey(mid);
+            } else {
+                // 일반 사용자 → 본인 read 기록만 제거
+                chatRoomRedisService.removeReadUser(mid, userId);
             }
         }
 
+
+        // 방장인 경우 DB에 채팅방 마감 처리
+        if (isHostUser) {
+            room.closeRoom(); // DB 플래그 설정
+            chatRoomRepository.save(room);
+        }
+
+        // DB에서 참여자 삭제 및 인원 감소
         participantRepository.delete(participant);
         room.decreaseParticipants(); // currentParticipants 1 감소
     }

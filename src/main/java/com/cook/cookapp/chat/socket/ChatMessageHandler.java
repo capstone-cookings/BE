@@ -8,6 +8,8 @@ import com.cook.cookapp.chat.entity.ChatRoom;
 import com.cook.cookapp.chat.redis.ChatRoomRedisService;
 import com.cook.cookapp.chat.repository.ChatRoomParticipantRepository;
 import com.cook.cookapp.chat.service.ChatService;
+import com.cook.cookapp.chat.socket.dto.req.ChatMessageSocketRequest;
+import com.cook.cookapp.chat.socket.dto.req.ChatReadEventRequest;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.service.UserService;
@@ -44,15 +46,15 @@ public class ChatMessageHandler {
         // 읽음 처리: DB 업데이트 + Redis 기록
         List<ChatMessage> unreadMessages = chatService.markMessagesAsRead(userId, roomId);
 
-        // 채팅방 참여자 수 (전체 인원)
-        int totalParticipants = participantRepository.countByRoomId(roomId);
+
+        // 현재 참여자 ID 목록
+        List<Long> roomUserIds = participantRepository.findUserIdsByRoomId(roomId);
 
         for (ChatMessage message : unreadMessages) {
             Long messageId = message.getId();
 
-            // Redis 기준 읽은 사람 수
-            int readCount = chatRoomRedisService.getReadCount(messageId);
-            int unreadCount = totalParticipants - readCount;
+            // Redis 기준 unread 계산
+            int unreadCount = chatRoomRedisService.getUnreadCount(messageId, roomUserIds);
 
             ChatDtoRes.ChatUnreadBroadcast payload = ChatDtoRes.ChatUnreadBroadcast.builder()
                     .messageId(messageId)
@@ -66,6 +68,7 @@ public class ChatMessageHandler {
             );
         }
     }
+
     @MessageMapping("/chat/message")
     public void handleChatMessage(ChatMessageSocketRequest request, Principal principal) {
         Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);

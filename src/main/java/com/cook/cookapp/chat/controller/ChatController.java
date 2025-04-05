@@ -47,7 +47,8 @@ public class ChatController {
         return ApiResponse.of(SuccessStatus._OK, chatService.joinRoom(userId, roomId));
     }
 
-    @Operation(summary = "채팅 메시지 전송 API", description = "채팅방에 메시지를 저장합니다.")
+    @Deprecated // 나중에 정리 예정
+    @Operation(summary = "채팅 메시지 전송(WebSocket X) API", description = "채팅방 메시지를 DB에 저장합니다.(WebSocket을 사용하지 않는 경우)")
     @PostMapping("/room/{roomId}/message")
     public ApiResponse<ChatDtoRes.ChatMessageResponse> sendMessage(
             @PathVariable Long roomId,
@@ -88,10 +89,9 @@ public class ChatController {
         return ApiResponse.of(SuccessStatus._OK, chatService.getMessagesByRoomId(userId, roomId));
     }
 
+    @Operation(summary = "채팅방 참여자 목록 조회 API", description = "채팅방의 참여자 목록을 조회합니다.")
     @GetMapping("/room/{roomId}/participants")
     public ApiResponse<List<ChatDtoRes.ChatRoomMemberListResponse>> getParticipants(@PathVariable Long roomId) {
         return ApiResponse.of(SuccessStatus._OK, chatService.getRoomParticipants(roomId));
     }
-
-
 }

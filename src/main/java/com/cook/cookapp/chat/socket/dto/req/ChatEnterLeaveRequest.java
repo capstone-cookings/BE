@@ -1,10 +1,10 @@
-package com.cook.cookapp.chat.socket;
+package com.cook.cookapp.chat.socket.dto.req;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ChatReadEventRequest {
+public class ChatEnterLeaveRequest {
     private Long roomId;
 }

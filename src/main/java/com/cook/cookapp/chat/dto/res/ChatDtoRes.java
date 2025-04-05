@@ -29,6 +29,7 @@ public class ChatDtoRes {
         private LocalDateTime lastMessageTime;//가장 최근 메시지 시간
 
         private int unreadCount; //안 읽은 메시지 수
+        private boolean isActive; //활성화 여부
     }
 
     @Getter
@@ -61,7 +62,7 @@ public class ChatDtoRes {
 
     @Getter
     @AllArgsConstructor(staticName = "of")
-    public class ChatRoomMemberListResponse {
+    public static class ChatRoomMemberListResponse {
         private String nickname;
         private String imageUrl; // 프로필 이미지 URL
         private boolean isHost; // 방장 여부

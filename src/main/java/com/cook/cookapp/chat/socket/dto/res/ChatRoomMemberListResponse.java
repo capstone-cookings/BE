@@ -1,4 +1,4 @@
-package com.cook.cookapp.chat.socket;
+package com.cook.cookapp.chat.socket.dto.res;
 
 import lombok.Builder;
 import lombok.Getter;
