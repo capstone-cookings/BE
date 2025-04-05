@@ -49,8 +49,6 @@ public class ChatDtoRes {
     public static class ChatUnreadBroadcast {
         private Long messageId;
         private int unreadCount; // 안 읽은 사람 수
-        private Long roomId;         // 어떤 채팅방의 메시지인지 명시
-        private boolean isMyMessage; // 본인이 보낸 메시지 여부 (프론트에서 UI 분기 용도)
     }
 
     @Getter

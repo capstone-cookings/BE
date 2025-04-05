@@ -62,7 +62,7 @@ public class ChatController {
     @PostMapping("/room/{roomId}/read")
     public ApiResponse<Integer> markMessagesAsRead(@PathVariable Long roomId) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        int readCount = chatService.markMessagesAsRead(userId, roomId).size();;
+        int readCount = chatService.markMessagesAsRead(userId, roomId).size();
         return ApiResponse.of(SuccessStatus._OK, readCount);
     }
 
