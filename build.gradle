@@ -50,8 +50,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	//Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	//websocket
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {
