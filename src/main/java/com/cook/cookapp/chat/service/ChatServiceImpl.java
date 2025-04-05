@@ -16,11 +16,14 @@ import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
 import com.cook.cookapp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -140,6 +143,7 @@ public class ChatServiceImpl implements ChatService {
         return result;
     }
 
+    // 채팅방 메시지 목록 조회
     @Override
     public List<ChatDtoRes.ChatMessageResponse> getMessagesByRoomId(Long userId, Long roomId) {
         // 채팅방 존재 여부 검증
@@ -167,6 +171,44 @@ public class ChatServiceImpl implements ChatService {
                             .sentAt(msg.getSentAt()) // 보낸 시간
                             .isRead(msg.isRead() || msg.getSenderId().equals(userId)) // 내가 보낸 건 무조건 읽음 처리
                             .unreadCount(unreadCount) // 안 읽은 사람 수
+                            .build();
+                })
+                .toList();
+    }
+
+    // 채팅방 메시지 목록 조회 (스크롤)
+    @Override
+    public List<ChatDtoRes.ChatMessageResponse> getMessagesByRoomId(Long userId, Long roomId, Long lastMessageId, int size) {
+        // 채팅방 존재 여부 검증
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+
+        // 참여자 확인
+        if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
+        }
+
+        // 참여자 목록
+        List<Long> roomUserIds = participantRepository.findUserIdsByRoomId(roomId);
+
+        // 메시지 조회 (id 기준 역순 조회)
+        Pageable pageable = PageRequest.of(0, size);
+        List<ChatMessage> messages = chatMessageRepository.findMessagesBeforeId(roomId, lastMessageId, pageable);
+
+        // id 역순으로 가져왔기 때문에 다시 정렬
+        messages.sort(Comparator.comparing(ChatMessage::getId));
+
+        return messages.stream()
+                .map(msg -> {
+                    int unreadCount = chatRoomRedisService.getUnreadCount(msg.getId(), roomUserIds);
+                    return ChatDtoRes.ChatMessageResponse.builder()
+                            .messageId(msg.getId())
+                            .senderId(msg.getSenderId())
+                            .senderNickname(msg.getSenderNickname())
+                            .content(msg.getContent())
+                            .sentAt(msg.getSentAt())
+                            .isRead(msg.isRead() || msg.getSenderId().equals(userId))
+                            .unreadCount(unreadCount)
                             .build();
                 })
                 .toList();

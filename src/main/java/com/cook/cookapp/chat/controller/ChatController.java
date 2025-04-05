@@ -7,6 +7,7 @@ import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.chat.service.ChatService;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class ChatController {
 
     @Operation(summary = "채팅방 생성 API", description = "사용자가 새로운 채팅방을 생성합니다.")
     @PostMapping("/room")
-    public ApiResponse<ChatDtoRes.ChatRoomResponse> createRoom(@RequestBody ChatDtoReq.ChatRoomCreateRequest request) {
+    public ApiResponse<ChatDtoRes.ChatRoomResponse> createRoom(@Valid @RequestBody ChatDtoReq.ChatRoomCreateRequest request) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         ChatDtoRes.ChatRoomResponse response = chatService.createChatRoom(userId, request);
         return ApiResponse.of(SuccessStatus._OK, response);
@@ -82,12 +83,26 @@ public class ChatController {
         return ApiResponse.of(SuccessStatus._OK, "채팅방이 마감되었습니다.");
     }
 
+    @Deprecated
     @Operation(summary = "채팅 메시지 목록 조회 API", description = "특정 채팅방의 메시지 목록을 조회합니다.")
     @GetMapping("/room/{roomId}/messages")
     public ApiResponse<List<ChatDtoRes.ChatMessageResponse>> getMessages(@PathVariable Long roomId) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         return ApiResponse.of(SuccessStatus._OK, chatService.getMessagesByRoomId(userId, roomId));
     }
+
+    @Operation(summary = "채팅 메시지 목록 조회(스크롤) API", description = "이전 메시지를 무한스크롤 방식으로 불러옵니다.")
+    @GetMapping("/room/{roomId}/messages/scroll")
+    public ApiResponse<List<ChatDtoRes.ChatMessageResponse>> getMessagesWithScroll(
+            @PathVariable Long roomId,
+            @RequestParam(required = false) Long lastMessageId,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        List<ChatDtoRes.ChatMessageResponse> result = chatService.getMessagesByRoomId(userId, roomId, lastMessageId, size);
+        return ApiResponse.of(SuccessStatus._OK, result);
+    }
+
 
     @Operation(summary = "채팅방 참여자 목록 조회 API", description = "채팅방의 참여자 목록을 조회합니다.")
     @GetMapping("/room/{roomId}/participants")
