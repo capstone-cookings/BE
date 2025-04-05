@@ -1,11 +1,8 @@
 package com.cook.cookapp.post.converter;
 
-import com.cook.cookapp.apiPayload.code.exception.GeneralException;
-import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
-import com.cook.cookapp.post.entity.LikedPost;
 import com.cook.cookapp.post.entity.Post;
 import com.cook.cookapp.post.repository.LikedPostRepository;
 import com.cook.cookapp.user.entity.User;
@@ -37,7 +34,7 @@ public class PostConverter {
     }
 
     public PostResDto.UserPostRes toDto(Post post,Long userId) {
-        boolean isLiked = likedPostRepository.existsByUserId(userId);
+        boolean isLiked = likedPostRepository.existsByUserIdAndPostId(userId,post.getId());
         PostResDto.UserPostRes userPostRes = PostResDto.UserPostRes.builder()
                 .id(post.getId())
                 .district(post.getUser().getDistrict())
@@ -54,7 +51,7 @@ public class PostConverter {
     }
 
     public PostResDto.SpecPostRes toSpecDto(Post post, Long userId) {
-        boolean isLiked = likedPostRepository.existsByUserId(userId);
+        boolean isLiked = likedPostRepository.existsByUserIdAndPostId(userId,post.getId());
         PostResDto.SpecPostRes specPostRes = PostResDto.SpecPostRes.builder()
                 .id(post.getId())
                 .nickname(post.getUser().getNickname())
