@@ -28,10 +28,9 @@ public class PostController {
 
     @Operation(summary = "게시글 등록 API", description = "사용자가 게시글을 등록합니다")
     @PostMapping("")
-    public ApiResponse<String> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
+    public ApiResponse<Long> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        postService.addPost(userId, postDtoReq);
-        return ApiResponse.onSuccess("게시글을 등록하였습니다");
+        return ApiResponse.onSuccess(postService.addPost(userId, postDtoReq));
     }
 
 
@@ -79,10 +78,11 @@ public class PostController {
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, // 기본값 1로 설정
             @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
+        Long userId = jwtTokenProvider.getUserIdFromToken();
         // 페이지 번호를 1-based에서 0-based로 변환
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
-        return ApiResponse.onSuccess(postService.searchPosts(keyword, adjustedPageable));
+        return ApiResponse.onSuccess(postService.searchPosts(userId, keyword, adjustedPageable));
 
     }
 

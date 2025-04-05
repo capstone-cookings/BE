@@ -7,7 +7,9 @@ import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.converter.PostConverter;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
+import com.cook.cookapp.post.entity.LikedPost;
 import com.cook.cookapp.post.entity.Post;
+import com.cook.cookapp.post.repository.LikedPostRepository;
 import com.cook.cookapp.post.repository.PostRepository;
 import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.entity.User;
@@ -30,24 +32,29 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final PostConverter postConverter;
     private final AmazonS3Util amazonS3Util;
+    private final LikedPostRepository likedPostRepository;
 
     @Override
-    public void addPost(Long userId, PostDtoReq postDtoReq) {
+    public Long addPost(Long userId, PostDtoReq postDtoReq) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-        postRepository.save(postConverter.toEntity(postDtoReq,user));
+        Post post = postRepository.save(postConverter.toEntity(postDtoReq, user));
+
+        return post.getId();
     }
 
+    //내가 쓴 글 조회
     @Override
     public Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable) {
-        return postRepository.findByUserId(userId, pageable)
-                .map(postConverter::toDto);
+        Page<Post> post = postRepository.findByUserId(userId, pageable);
+        return post.map(p -> postConverter.toDto(p,userId));
+
     }
 
     @Override
     public PostResDto.SpecPostRes getPostById(Long postId,Long userId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
-        return postConverter.toSpecDto(post);
+        return postConverter.toSpecDto(post,userId);
     }
 
     @Override
@@ -69,9 +76,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostResDto.UserPostRes> searchPosts(String keyword, Pageable pageable){
-        return postRepository.findByTitleContaining(keyword, pageable)
-                .map(postConverter::toDto);
+    public Page<PostResDto.UserPostRes> searchPosts(Long userId, String keyword, Pageable pageable){
+        Page<Post> post = postRepository.findByTitleContaining(keyword, pageable);
+        return post.map(p -> postConverter.toDto(p,userId));
     }
 
 }
