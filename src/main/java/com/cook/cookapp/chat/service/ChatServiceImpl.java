@@ -178,7 +178,7 @@ public class ChatServiceImpl implements ChatService {
 
     // 채팅방 메시지 목록 조회 (스크롤)
     @Override
-    public List<ChatDtoRes.ChatMessageResponse> getMessagesByRoomId(Long userId, Long roomId, Long lastMessageId, int size) {
+    public List<ChatDtoRes.ChatMessageResponse> getMessagesByRoomIdWithScroll(Long userId, Long roomId, Long lastMessageId, int size) {
         // 채팅방 존재 여부 검증
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));

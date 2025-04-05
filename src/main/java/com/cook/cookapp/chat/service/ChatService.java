@@ -13,7 +13,7 @@ public interface ChatService {
     ChatDtoRes.ChatRoomResponse joinRoom(Long userId, Long roomId);
     List<ChatDtoRes.ChatRoomListItemResponse> getMyChatRooms(Long userId); // 참여한 방 목록만
     List<ChatDtoRes.ChatMessageResponse> getMessagesByRoomId(Long userId, Long roomId);
-    List<ChatDtoRes.ChatMessageResponse> getMessagesByRoomId(Long userId, Long roomId, Long lastMessageId, int size);
+    List<ChatDtoRes.ChatMessageResponse> getMessagesByRoomIdWithScroll(Long userId, Long roomId, Long lastMessageId, int size);
     ChatDtoRes.ChatMessageResponse sendMessage(Long userId, Long roomId, ChatDtoReq.ChatMessageRequest request);
     List<ChatMessage> markMessagesAsRead(Long userId, Long roomId);
     ChatDtoRes.ChatMessageResponse saveWebSocketMessage(Long roomId, Long senderId, String senderNickname, String content);

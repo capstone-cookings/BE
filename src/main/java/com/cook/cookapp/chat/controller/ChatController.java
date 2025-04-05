@@ -99,7 +99,7 @@ public class ChatController {
             @RequestParam(defaultValue = "20") int size
     ) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        List<ChatDtoRes.ChatMessageResponse> result = chatService.getMessagesByRoomId(userId, roomId, lastMessageId, size);
+        List<ChatDtoRes.ChatMessageResponse> result = chatService.getMessagesByRoomIdWithScroll(userId, roomId, lastMessageId, size);
         return ApiResponse.of(SuccessStatus._OK, result);
     }
 
