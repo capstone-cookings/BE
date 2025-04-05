@@ -3,10 +3,10 @@ package com.cook.cookapp.common;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -45,6 +45,25 @@ public class RedisConfig {
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
         template.afterPropertiesSet();
+        return template;
+    }
+    /**
+     * WebSocket 전용 RedisTemplate
+     * Redis 1번 DB를 사용하여 채팅방 참여자 정보를 관리
+     */
+    @Bean(name = "chatRedisTemplate")
+    public StringRedisTemplate chatRedisTemplate() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
+//        config.setPassword(RedisPassword.of(password));
+        config.setDatabase(1); //  1번 DB 사용!
+
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(config);
+        factory.afterPropertiesSet();
+
+        StringRedisTemplate template = new StringRedisTemplate();
+        template.setConnectionFactory(factory);
+        template.afterPropertiesSet();
+
         return template;
     }
 }
