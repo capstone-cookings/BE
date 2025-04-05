@@ -22,4 +22,5 @@ public interface UserService {
     void addLocation(Long userId, UserDtoReq.UserLocationReq request);
     UserDtoRes.UserLocationRes getLocation(Long userId);
     void updateNickname(Long userId, String nickname);
+    User getUserById(Long id);
 }

@@ -28,6 +28,7 @@ public class PostResDto {
         private String district;
         private String neighborhood;
         private List<String> imageUrls;
+        private boolean liked;
     }
 
     @Data
@@ -46,6 +47,7 @@ public class PostResDto {
         private String nickname;
         private String district;
         private String neighborhood;
+        private boolean liked;
         private List<String> imageUrls;
     }
 

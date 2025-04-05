@@ -25,9 +25,9 @@ public class S3Controller {
     public ApiResponse<String> updateProfileImage(@RequestPart("profileImage") MultipartFile profileImage) throws IOException {
         Long userId = jwtTokenProvider.getUserIdFromToken();
 
-        String imageUrl = amazonS3Util.profileImageUpload(profileImage, userId);
+        amazonS3Util.profileImageUpload(profileImage, userId);
 
-        return ApiResponse.onSuccess(imageUrl);
+        return ApiResponse.onSuccess("프로필 이미지 업로드 성공했습니다");
     }
 
     @Operation(summary = "레시피 이미지 업로드 API", description = "레시피 이미지를 업로드 합니다.")
@@ -35,18 +35,18 @@ public class S3Controller {
     public ApiResponse<String> updateRecipeImage(@RequestPart("recipeImage") MultipartFile recipeImage, @PathVariable Long recipeId) throws IOException {
         Long userId = jwtTokenProvider.getUserIdFromToken();
 
-        String imageUrl = amazonS3Util.recipeImageUpload(recipeImage, recipeId, userId);
+        amazonS3Util.recipeImageUpload(recipeImage, recipeId, userId);
 
-        return ApiResponse.onSuccess(imageUrl);
+        return ApiResponse.onSuccess("이미지 업로드 성공했습니다");
     }
 
     @Operation(summary = "게시글 이미지 업로드 API", description = "게시글 이미지를 업로드 합니다.")
     @PostMapping(value = "/update-post/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<List<String>> updateRecipeImage(@RequestPart("postImage") List<MultipartFile> postImages, @PathVariable Long postId) throws IOException {
+    public ApiResponse<String> updateRecipeImage(@RequestPart("postImage") List<MultipartFile> postImages, @PathVariable Long postId) throws IOException {
         Long userId = jwtTokenProvider.getUserIdFromToken();
 
-        List<String> imageUrls = amazonS3Util.postImageUpload(postImages, postId, userId);
+        amazonS3Util.postImageUpload(postImages, postId, userId);
 
-        return ApiResponse.onSuccess(imageUrls);
+        return ApiResponse.onSuccess("게시글 이미지 업로드 성공했습니다");
     }
 }
