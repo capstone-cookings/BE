@@ -64,7 +64,7 @@ public class AmazonS3Util {
     //프로필 이미지 업로드
     //db에 있는걸 먼저 찾고 s3를 삭제한 후 디비 데이터를 삭제해주시면 됩니다!
     @Transactional
-    public String profileImageUpload(MultipartFile multipartFile, Long userId) throws IOException {
+    public void profileImageUpload(MultipartFile multipartFile, Long userId) throws IOException {
 
         String contentType = multipartFile.getContentType();
         //용량 5MB이하만 받도록 제한
@@ -116,12 +116,11 @@ public class AmazonS3Util {
             userRepository.save(user);
             profileImageRepository.save(newProfileImage);
 
-            return amazonS3Client.getUrl(bucket, key).toString();
         }
     }
 
     @Transactional
-    public String recipeImageUpload(MultipartFile multipartFile,Long recipeId, Long userId) throws IOException {
+    public void recipeImageUpload(MultipartFile multipartFile,Long recipeId, Long userId) throws IOException {
 
         String contentType = multipartFile.getContentType();
         //용량 5MB이하만 받도록 제한
@@ -171,12 +170,11 @@ public class AmazonS3Util {
             recipeRepository.save(recipe);
             recipeImageRepository.save(newRecipeImage);
 
-            return amazonS3Client.getUrl(bucket, key).toString();
         }
     }
 
     @Transactional
-    public List<String> postImageUpload(List<MultipartFile> multipartFiles, Long postId, Long userId) throws IOException {
+    public void postImageUpload(List<MultipartFile> multipartFiles, Long postId, Long userId) throws IOException {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
 
@@ -222,7 +220,6 @@ public class AmazonS3Util {
             uploadedImageUrls.add(amazonS3Client.getUrl(bucket, key).toString());
         }
 
-        return uploadedImageUrls;
     }
 
 

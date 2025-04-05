@@ -1,9 +1,13 @@
 package com.cook.cookapp.post.converter;
 
+import com.cook.cookapp.apiPayload.code.exception.GeneralException;
+import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
+import com.cook.cookapp.post.entity.LikedPost;
 import com.cook.cookapp.post.entity.Post;
+import com.cook.cookapp.post.repository.LikedPostRepository;
 import com.cook.cookapp.user.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +17,11 @@ import java.time.LocalDateTime;
 @Component
 public class PostConverter {
     private final AmazonS3Util amazonS3Util;
+    private final LikedPostRepository likedPostRepository;
 
-    public PostConverter(AmazonS3Util amazonS3Util) {
+    public PostConverter(AmazonS3Util amazonS3Util, LikedPostRepository likedPostRepository) {
         this.amazonS3Util = amazonS3Util;
+        this.likedPostRepository = likedPostRepository;
     }
 
     public Post toEntity(PostDtoReq dto, User user) {
@@ -30,7 +36,8 @@ public class PostConverter {
 
     }
 
-    public PostResDto.UserPostRes toDto(Post post) {
+    public PostResDto.UserPostRes toDto(Post post,Long userId) {
+        boolean isLiked = likedPostRepository.existsByUserId(userId);
         PostResDto.UserPostRes userPostRes = PostResDto.UserPostRes.builder()
                 .id(post.getId())
                 .district(post.getUser().getDistrict())
@@ -40,12 +47,14 @@ public class PostConverter {
                 .memberCount(post.getMemberCount())
                 .timeAgo(calTime(post.getUpdatedAt()))
                 .likeCount(post.getLikeCount())
+                .liked(isLiked)
                 .build();
         userPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
         return userPostRes;
     }
 
-    public PostResDto.SpecPostRes toSpecDto(Post post) {
+    public PostResDto.SpecPostRes toSpecDto(Post post, Long userId) {
+        boolean isLiked = likedPostRepository.existsByUserId(userId);
         PostResDto.SpecPostRes specPostRes = PostResDto.SpecPostRes.builder()
                 .id(post.getId())
                 .nickname(post.getUser().getNickname())
@@ -57,6 +66,7 @@ public class PostConverter {
                 .price(post.getPrice())
                 .memberCount(post.getMemberCount())
                 .timeAgo(calTime(post.getUpdatedAt()))
+                .liked(isLiked)
                 .likeCount(post.getLikeCount())
                 .build();
         specPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
