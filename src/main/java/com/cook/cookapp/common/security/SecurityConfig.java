@@ -32,12 +32,11 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
+        http.csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 비활성화
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
+                        .requestMatchers("/ws/chat/**","/swagger-ui/**", "/v3/api-docs/**",
                                 "/swagger-resources/**", "/webjars/**", "/health", "/api/**", "/api/essay/**",
                                 "/callback", "/login/**" , "/oauth/**").permitAll() // 공개 엔드포인트 설정
                         .anyRequest().authenticated()
@@ -88,6 +87,7 @@ public class SecurityConfig {
 //        configuration.addAllowedOriginPattern("*"); // 모든 출처 허용 (필요시 특정 도메인으로 변경)
         // 허용할 Origin 도메인 설정(앱이라도 swagger사용시 필요)
         configuration.setAllowedOrigins(Arrays.asList(
+                "http://127.0.0.1:5500",
                 "http://localhost:8080",
                 "https://localhost:8080",
                 "https://api.refrigerator.asia",

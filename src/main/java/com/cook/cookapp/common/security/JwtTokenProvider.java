@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.Principal;
 import java.util.Base64;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -175,4 +176,47 @@ public class JwtTokenProvider {
             deleteRefreshToken(userId);
         }
     }
+    /**
+     * WebSocket 메시지 처리 시 전달되는 Principal 객체로부터 userId를 추출합니다.
+     *
+     * WebSocket 연결은 필터를 거치지 않기 때문에, JWT 인증 정보를 ChannelInterceptor에서 수동 등록합니다.
+     * 이후 메시지 수신 시 핸들러(@MessageMapping)에서 Principal이 주입되며,
+     * 이 Principal은 내부적으로 Authentication 객체로 캐스팅 가능하므로 userId 추출이 가능합니다.
+     *
+     * @param principal WebSocket 핸들러에 주입된 Principal
+     * @return userId (Long) 또는 null
+     */
+    public Long getUserIdFromPrincipal(Principal principal) {
+        if (principal == null) return null;
+        Authentication auth = (Authentication) principal;
+        return getUserIdInAuthentication(auth); // 내부적으로 userId 추출
+    }
+    /**
+     * Spring Security의 Authentication 객체에서 사용자 ID(userId)를 추출합니다.
+     *
+     * JWT 인증이 완료된 사용자의 Authentication.getPrincipal()에는 보통 userId가 문자열 형태로 저장됩니다.
+     * 예) Authentication.getPrincipal() → "42" (userId = 42)
+     *
+     * 인증 방식에 따라 principal 타입이 다를 수 있기 때문에,
+     * String 또는 UserDetails 형태에 모두 대응하도록 처리합니다.
+     *
+     * @param authentication 인증 객체
+     * @return userId (Long) 또는 인증되지 않았을 경우 null
+     */
+    public Long getUserIdInAuthentication(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) return null;
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            // 기본 UserDetails 구현을 사용하는 경우
+            return Long.parseLong(userDetails.getUsername()); // 보통 userId를 username에 넣는 경우
+        } else if (principal instanceof String principalString) {
+            // JWT 인증 시 principal을 userId 문자열로 넣어둔 경우
+            return Long.parseLong(principalString);
+        }
+
+        return null;
+    }
+
 }
