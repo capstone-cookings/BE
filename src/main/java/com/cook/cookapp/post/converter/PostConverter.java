@@ -67,6 +67,7 @@ public class PostConverter {
                 .likeCount(post.getLikeCount())
                 .build();
         specPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
+        specPostRes.setProfileImageUrl(amazonS3Util.getProfilePath(post.getUser().getId()));
         //TODO 등급 설정, 조회수
         return specPostRes;
     }
