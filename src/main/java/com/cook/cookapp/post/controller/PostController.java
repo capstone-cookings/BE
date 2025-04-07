@@ -16,7 +16,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/post")
@@ -26,11 +31,14 @@ public class PostController {
     private final PostService postService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Operation(summary = "게시글 등록 API", description = "사용자가 게시글을 등록합니다")
-    @PostMapping("")
-    public ApiResponse<Long> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
+    @Operation(summary = "게시글 등록 API", description = "사용자가 게시글과 이미지를 함께 등록합니다.")
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Long> addPost(
+            @RequestPart("post") @Valid PostDtoReq postDtoReq,
+            @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) throws IOException {
+
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        return ApiResponse.onSuccess(postService.addPost(userId, postDtoReq));
+        return ApiResponse.onSuccess(postService.addPost(userId, postDtoReq, postImages));
     }
 
 

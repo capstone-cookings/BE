@@ -40,13 +40,21 @@ public class S3Controller {
         return ApiResponse.onSuccess("이미지 업로드 성공했습니다");
     }
 
-    @Operation(summary = "게시글 이미지 업로드 API", description = "게시글 이미지를 업로드 합니다.")
-    @PostMapping(value = "/update-post/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<String> updateRecipeImage(@RequestPart("postImage") List<MultipartFile> postImages, @PathVariable Long postId) throws IOException {
+    //게시글 이미지 추가 (개별 추가)
+    @Operation(summary = "게시글 이미지 추가 API", description = "게시글에 이미지를 추가합니다.")
+    @PostMapping(value = "/add-post-image/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<String> addPostImage(@RequestPart("postImage") List<MultipartFile> postImages, @PathVariable Long postId) throws IOException {
         Long userId = jwtTokenProvider.getUserIdFromToken();
+        amazonS3Util.addPostImage(postImages, postId, userId);
+        return ApiResponse.onSuccess("게시글 이미지 추가에 성공했습니다");
+    }
 
-        amazonS3Util.postImageUpload(postImages, postId, userId);
-
-        return ApiResponse.onSuccess("게시글 이미지 업로드 성공했습니다");
+    //게시글 이미지 삭제 (개별 삭제)
+    @Operation(summary = "게시글 이미지 삭제 API", description = "게시글의 특정 이미지를 삭제합니다.")
+    @DeleteMapping("/delete-post-image/{postId}/{imageId}")
+    public ApiResponse<String> deletePostImage(@PathVariable Long postId, @PathVariable Long imageId) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        amazonS3Util.deletePostImage(postId, imageId, userId);
+        return ApiResponse.onSuccess("게시글 이미지 삭제에 성공했습니다");
     }
 }

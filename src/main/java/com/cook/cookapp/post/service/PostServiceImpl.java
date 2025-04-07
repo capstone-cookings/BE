@@ -21,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -42,10 +44,15 @@ public class PostServiceImpl implements PostService {
     private final SearchHistoryRepository searchHistoryRepository;
 
     @Override
-    public Long addPost(Long userId, PostDtoReq postDtoReq) {
+    public Long addPost(Long userId, PostDtoReq postDtoReq, List<MultipartFile> postImages) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
         Post post = postRepository.save(postConverter.toEntity(postDtoReq, user));
+
+        if (postImages != null && !postImages.isEmpty()) {
+            amazonS3Util.uploadPostImages(postImages, post);  // 기존 postImageUpload에서 remainImageUrls 없는 버전
+        }
 
         return post.getId();
     }
