@@ -48,10 +48,18 @@ public class PostResDto {
         private String district;
         private String neighborhood;
         private boolean liked;
-        private List<String> imageUrls;
-        private List<Long> imageIds;
+        private List<SpecPostImageRes> image;
         private String profileImageUrl;
     }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class SpecPostImageRes{
+        private String imageUrl;
+        private Long imageId;
+    }
+
 
     @Data
     @AllArgsConstructor
