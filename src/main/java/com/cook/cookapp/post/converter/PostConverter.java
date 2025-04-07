@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @Component
 public class PostConverter {
@@ -65,6 +66,7 @@ public class PostConverter {
                 .timeAgo(calTime(post.getUpdatedAt()))
                 .liked(isLiked)
                 .likeCount(post.getLikeCount())
+                .imageIds(post.getPostImage().stream().map(postImage -> postImage.getId()).collect(Collectors.toList()))
                 .build();
         specPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
         specPostRes.setProfileImageUrl(amazonS3Util.getProfilePath(post.getUser().getId()));
