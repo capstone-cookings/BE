@@ -69,6 +69,11 @@ public enum ErrorStatus implements BaseErrorCode {
     FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "FILE4000", "이미지 용량은 5MB이하로 해주세요"),
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST,"FILE4000","이미지 파일만 업로드해주세요" ),
 
+    //검색 기록 관련
+    EXISTS_SEARCH_HISTORY(HttpStatus.CONFLICT, "HISTORY4000", "이미 해당 검색어에 대한 기록이 존재합니다."),
+    NO_EXISTS_SEARCH_HISTORY(HttpStatus.NOT_FOUND, "HISTORY4001", "검색어가 존재하지 않습니다"),
+    NO_EXISTS_USER_SEARCH_HISTORY(HttpStatus.NOT_FOUND, "HISTORY4002", "해당 사용자가 검색한 기록이 없습니다"),
+
     // Chat
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4001", "채팅방을 찾을 수 없습니다."),
     UNAUTHORIZED_CHAT_ACCESS(HttpStatus.FORBIDDEN, "CHAT4002", "해당 채팅방에 접근할 권한이 없습니다."),

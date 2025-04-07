@@ -49,6 +49,8 @@ public class PostResDto {
         private String neighborhood;
         private boolean liked;
         private List<String> imageUrls;
+        private List<Long> imageIds;
+        private String profileImageUrl;
     }
 
     @Data
