@@ -85,7 +85,7 @@ public class ChatbotServiceImpl implements ChatbotService {
         String additionalInstruction = exclusionInstruction +
                 "다른 요리 레시피 하나만 추천해, 반드시 아래의 텍스트 형식으로만 답변해, 아래의 텍스트 외에는 어떤 텍스트도 출력하면 안됩니다.\n" +
                 "\"[요리이름]\\n\" +\n" +
-                "\"[재료] - 재료명1, 양 - 재료명2, 양\\n\" +\n" +
+                "\"[재료] - 재료명1 양, - 재료명2 양\\n\" +\n" +
                 "\"[레시피] 1. 단계1 2. 단계2\\n\"\n" +
                 "단, [레시피] 부분은 최대한 간결하게 출력해";
 
