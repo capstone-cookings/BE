@@ -1,6 +1,7 @@
 package com.cook.cookapp.post.dto.req;
 
 import com.cook.cookapp.post.entity.Enum.Category;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -20,7 +21,7 @@ public class PostDtoReq {
     @NotNull(message = "카테고리는 필수입니다.")
     private Category category;
 
-    @Positive(message = "공동구매 인원수는 양수여야 합니다.")
+    @Min(value = 2) //2 이상 입력 받아야 함
     private int memberCount;
 
     @Positive(message = "가격은 양수여야 합니다.")

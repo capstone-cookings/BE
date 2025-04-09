@@ -21,13 +21,15 @@ public class ChatController {
     private final ChatService chatService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Deprecated
     @Operation(summary = "채팅방 생성 API", description = "사용자가 새로운 채팅방을 생성합니다.")
     @PostMapping("/room")
     public ApiResponse<ChatDtoRes.ChatRoomResponse> createRoom(@Valid @RequestBody ChatDtoReq.ChatRoomCreateRequest request) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        ChatDtoRes.ChatRoomResponse response = chatService.createChatRoom(userId, request);
+        ChatDtoRes.ChatRoomResponse response = chatService.testCreateChatRoom(userId, request);
         return ApiResponse.of(SuccessStatus._OK, response);
     }
+
     @Operation(summary = "참여중인 채팅방 목록 조회 API",description = "사용자가 참여중인 채팅방 목록을 조회합니다.")
     @GetMapping("/my-rooms")
     public ApiResponse<List<ChatDtoRes.ChatRoomListItemResponse>> getMyRooms() {
