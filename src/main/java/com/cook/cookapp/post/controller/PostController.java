@@ -1,12 +1,11 @@
 package com.cook.cookapp.post.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
+import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.service.PostService;
-import com.cook.cookapp.post.service.PostServiceImpl;
-import com.cook.cookapp.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -31,9 +30,9 @@ public class PostController {
     private final PostService postService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Operation(summary = "게시글 등록 API", description = "사용자가 게시글과 이미지를 함께 등록합니다.")
+    @Operation(summary = "게시글 등록(채팅방 생성) API", description = "사용자가 게시글과 이미지를 함께 등록합니다.(채팅방을 자동 생성합니다.)")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<Long> addPost(
+    public ApiResponse<ChatDtoRes.ChatRoomCreatedResponse> addPost(
             @RequestPart("post") @Valid PostDtoReq postDtoReq,
             @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) throws IOException {
 
