@@ -64,7 +64,7 @@ public class AmazonS3Util {
     //프로필 이미지 업로드
     //db에 있는걸 먼저 찾고 s3를 삭제한 후 디비 데이터를 삭제해주시면 됩니다!
     @Transactional
-    public String profileImageUpload(MultipartFile multipartFile, Long userId) throws IOException {
+    public void profileImageUpload(MultipartFile multipartFile, Long userId) throws IOException {
 
         String contentType = multipartFile.getContentType();
         //용량 5MB이하만 받도록 제한
@@ -116,12 +116,11 @@ public class AmazonS3Util {
             userRepository.save(user);
             profileImageRepository.save(newProfileImage);
 
-            return amazonS3Client.getUrl(bucket, key).toString();
         }
     }
 
     @Transactional
-    public String recipeImageUpload(MultipartFile multipartFile,Long recipeId, Long userId) throws IOException {
+    public void recipeImageUpload(MultipartFile multipartFile,Long recipeId, Long userId) throws IOException {
 
         String contentType = multipartFile.getContentType();
         //용량 5MB이하만 받도록 제한
@@ -171,61 +170,8 @@ public class AmazonS3Util {
             recipeRepository.save(recipe);
             recipeImageRepository.save(newRecipeImage);
 
-            return amazonS3Client.getUrl(bucket, key).toString();
         }
     }
-
-    @Transactional
-    public List<String> postImageUpload(List<MultipartFile> multipartFiles, Long postId, Long userId) throws IOException {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
-
-        // 기존 이미지 삭제
-        List<PostImage> existingImages = postImageRepository.findByPost(post);
-        for (PostImage existingImage : existingImages) {
-            post.setPostImage(null);
-            postRepository.save(post);
-            String existingKey = postPath + "/" + existingImage.getUuid() + "_" + existingImage.getOriginalFilename();
-            amazonS3Client.deleteObject(bucket, existingKey);
-            postImageRepository.delete(existingImage);
-            postImageRepository.flush();
-        }
-
-        List<String> uploadedImageUrls = new ArrayList<>();
-
-        for (MultipartFile multipartFile : multipartFiles) {
-            String contentType = multipartFile.getContentType();
-            if (multipartFile.getSize() > MAX_FILE_SIZE) {
-                throw new GeneralException(ErrorStatus.FILE_TOO_LARGE);
-            }
-            if (contentType == null || !contentType.startsWith("image/")) {
-                throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
-            }
-
-            String uuid = UUID.randomUUID().toString();
-            String key = postPath + "/" + uuid + "_" + multipartFile.getOriginalFilename();
-
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(multipartFile.getSize());
-            metadata.setContentType(multipartFile.getContentType());
-            amazonS3Client.putObject(bucket, key, multipartFile.getInputStream(), metadata);
-
-            PostImage newPostImage = PostImage.builder()
-                    .uuid(uuid)
-                    .originalFilename(multipartFile.getOriginalFilename())
-                    .contentType(multipartFile.getContentType())
-                    .fileSize(multipartFile.getSize())
-                    .post(post)
-                    .build();
-
-            postImageRepository.save(newPostImage);
-            uploadedImageUrls.add(amazonS3Client.getUrl(bucket, key).toString());
-        }
-
-        return uploadedImageUrls;
-    }
-
-
 
     //프로필 이미지 url 가져오기
     public String getProfilePath(Long userId) {
@@ -367,7 +313,103 @@ public class AmazonS3Util {
     }
 
 
+    @Transactional
+    public void uploadPostImages(List<MultipartFile> postImages, Post post) throws IOException {
+        for (MultipartFile multipartFile : postImages) {
+            String contentType = multipartFile.getContentType();
+            if (multipartFile.getSize() > MAX_FILE_SIZE) {
+                throw new GeneralException(ErrorStatus.FILE_TOO_LARGE);
+            }
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+            }
 
+            String uuid = UUID.randomUUID().toString();
+            String key = postPath + "/" + uuid + "_" + multipartFile.getOriginalFilename();
 
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getSize());
+            metadata.setContentType(contentType);
+            amazonS3Client.putObject(bucket, key, multipartFile.getInputStream(), metadata);
+
+            PostImage newPostImage = PostImage.builder()
+                    .uuid(uuid)
+                    .originalFilename(multipartFile.getOriginalFilename())
+                    .contentType(contentType)
+                    .fileSize(multipartFile.getSize())
+                    .post(post)
+                    .build();
+
+            postImageRepository.save(newPostImage);
+        }
+
+        postImageRepository.flush();
+    }
+
+    @Transactional
+    public void addPostImage(List<MultipartFile> multipartFiles, Long postId, Long userId) throws IOException {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+
+        // 본인 게시글인지 확인
+        if (!post.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_ACCESS);
+        }
+
+        for (MultipartFile multipartFile : multipartFiles) {
+            validateImage(multipartFile);
+
+            String uuid = UUID.randomUUID().toString();
+            String key = postPath + "/" + uuid + "_" + multipartFile.getOriginalFilename();
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getSize());
+            metadata.setContentType(multipartFile.getContentType());
+
+            amazonS3Client.putObject(bucket, key, multipartFile.getInputStream(), metadata);
+
+            PostImage newPostImage = PostImage.builder()
+                    .uuid(uuid)
+                    .originalFilename(multipartFile.getOriginalFilename())
+                    .contentType(multipartFile.getContentType())
+                    .fileSize(multipartFile.getSize())
+                    .post(post)
+                    .build();
+
+            postImageRepository.save(newPostImage);
+        }
+
+        postImageRepository.flush();
+    }
+
+    @Transactional
+    public void deletePostImage(Long postId, Long imageId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
+
+        PostImage image = postImageRepository.findById(imageId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.INVALID_IMAGE_URL));
+
+        if (!post.getUser().getId().equals(userId) || !image.getPost().getId().equals(postId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_ACCESS);
+        }
+
+        String key = postPath + "/" + image.getUuid() + "_" + image.getOriginalFilename();
+        amazonS3Client.deleteObject(bucket, key);
+
+        postImageRepository.delete(image);
+        postImageRepository.flush();
+    }
+
+    // 이미지 유효성 검사
+    private void validateImage(MultipartFile file) {
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new GeneralException(ErrorStatus.FILE_TOO_LARGE);
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+        }
+    }
 
 }

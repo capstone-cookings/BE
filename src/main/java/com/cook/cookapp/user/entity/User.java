@@ -3,6 +3,7 @@ package com.cook.cookapp.user.entity;
 import com.cook.cookapp.global.BaseEntity;
 import com.cook.cookapp.ingredient.entity.Ingredient;
 import com.cook.cookapp.post.entity.Post;
+import com.cook.cookapp.post.entity.SearchHistory;
 import com.cook.cookapp.recipe.entity.Recipe;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -58,6 +59,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Recipe> RecipeList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<SearchHistory> searchHistoryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Post> postList = new ArrayList<>();

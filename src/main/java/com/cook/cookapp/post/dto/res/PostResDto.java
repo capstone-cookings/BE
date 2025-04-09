@@ -28,6 +28,7 @@ public class PostResDto {
         private String district;
         private String neighborhood;
         private List<String> imageUrls;
+        private boolean liked;
     }
 
     @Data
@@ -46,8 +47,19 @@ public class PostResDto {
         private String nickname;
         private String district;
         private String neighborhood;
-        private List<String> imageUrls;
+        private boolean liked;
+        private List<SpecPostImageRes> image;
+        private String profileImageUrl;
     }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class SpecPostImageRes{
+        private String imageUrl;
+        private Long imageId;
+    }
+
 
     @Data
     @AllArgsConstructor

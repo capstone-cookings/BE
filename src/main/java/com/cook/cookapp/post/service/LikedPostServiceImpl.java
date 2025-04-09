@@ -27,17 +27,19 @@ public class LikedPostServiceImpl implements LikedPostService {
 
     @Override
     public PostResDto.likedRes likePost(Long userId, Long postId) {
-        LikedPost likedPost = likedPostRepository.findByUserIdAndPostId(userId, postId).orElse(null);
+        boolean exists = likedPostRepository.existsByUserIdAndPostId(userId, postId);
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
-        if (likedPost == null) {
-            // 좋아요가 없다면 새로 추가
-            likedPost = LikedPost.builder()
+
+        if (!exists) {
+            LikedPost likedPost = LikedPost.builder()
                     .user(userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND)))
                     .post(post)
                     .build();
+            // 좋아요가 없다면 새로 추가
             likedPostRepository.save(likedPost);
             post.setLikeCount(post.getLikeCount() + 1);
         } else {
+            LikedPost likedPost = likedPostRepository.findByUserIdAndPostId(userId, postId).orElseThrow(() -> new GeneralException(ErrorStatus.LIKED_POST_NOT_FOUND));
             // 이미 좋아요가 있으면, 해당 좋아요를 삭제하거나 카운트를 조정하는 로직
             likedPostRepository.delete(likedPost);
             likedPostRepository.flush();
@@ -52,6 +54,6 @@ public class LikedPostServiceImpl implements LikedPostService {
 
     public Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable) {
         return likedPostRepository.findByUserId(userId, pageable)
-                .map(likedPost -> postConverter.toDto(likedPost.getPost()));
+                .map(likedPost -> postConverter.toDto(likedPost.getPost(),userId));
     }
 }

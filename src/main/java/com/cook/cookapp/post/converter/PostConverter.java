@@ -4,18 +4,24 @@ import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.entity.Post;
+import com.cook.cookapp.post.entity.PostImage;
+import com.cook.cookapp.post.repository.LikedPostRepository;
 import com.cook.cookapp.user.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class PostConverter {
     private final AmazonS3Util amazonS3Util;
+    private final LikedPostRepository likedPostRepository;
 
-    public PostConverter(AmazonS3Util amazonS3Util) {
+    public PostConverter(AmazonS3Util amazonS3Util, LikedPostRepository likedPostRepository) {
         this.amazonS3Util = amazonS3Util;
+        this.likedPostRepository = likedPostRepository;
     }
 
     public Post toEntity(PostDtoReq dto, User user) {
@@ -30,7 +36,8 @@ public class PostConverter {
 
     }
 
-    public PostResDto.UserPostRes toDto(Post post) {
+    public PostResDto.UserPostRes toDto(Post post,Long userId) {
+        boolean isLiked = likedPostRepository.existsByUserIdAndPostId(userId,post.getId());
         PostResDto.UserPostRes userPostRes = PostResDto.UserPostRes.builder()
                 .id(post.getId())
                 .district(post.getUser().getDistrict())
@@ -40,13 +47,27 @@ public class PostConverter {
                 .memberCount(post.getMemberCount())
                 .timeAgo(calTime(post.getUpdatedAt()))
                 .likeCount(post.getLikeCount())
+                .liked(isLiked)
                 .build();
         userPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
         return userPostRes;
     }
 
-    public PostResDto.SpecPostRes toSpecDto(Post post) {
-        PostResDto.SpecPostRes specPostRes = PostResDto.SpecPostRes.builder()
+    public PostResDto.SpecPostRes toSpecDto(Post post, Long userId) {
+        boolean isLiked = likedPostRepository.existsByUserIdAndPostId(userId, post.getId());
+
+        List<String> imageUrls = amazonS3Util.getPostPath(post.getId());
+        List<PostImage> postImages = post.getPostImage();
+
+        List<PostResDto.SpecPostImageRes> imageList = new ArrayList<>();
+        for (int i = 0; i < postImages.size(); i++) {
+            imageList.add(PostResDto.SpecPostImageRes.builder()
+                    .imageId(postImages.get(i).getId())
+                    .imageUrl(imageUrls.get(i))
+                    .build());
+        }
+
+        return PostResDto.SpecPostRes.builder()
                 .id(post.getId())
                 .nickname(post.getUser().getNickname())
                 .district(post.getUser().getDistrict())
@@ -57,12 +78,14 @@ public class PostConverter {
                 .price(post.getPrice())
                 .memberCount(post.getMemberCount())
                 .timeAgo(calTime(post.getUpdatedAt()))
+                .liked(isLiked)
                 .likeCount(post.getLikeCount())
+                .image(imageList)
+                .profileImageUrl(amazonS3Util.getProfilePath(post.getUser().getId()))
                 .build();
-        specPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
-        //TODO 등급 설정, 조회수
-        return specPostRes;
     }
+
+
 
     public static String calTime(LocalDateTime updatedAt) {
         LocalDateTime now = LocalDateTime.now();

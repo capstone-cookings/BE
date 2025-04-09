@@ -1,7 +1,6 @@
 package com.cook.cookapp.post.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
-import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
 import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
@@ -16,7 +15,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/post")
@@ -26,12 +30,14 @@ public class PostController {
     private final PostService postService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Operation(summary = "게시글 등록 API", description = "사용자가 게시글을 등록합니다")
-    @PostMapping("")
-    public ApiResponse<ChatDtoRes.ChatRoomCreatedResponse> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
+    @Operation(summary = "게시글 등록(채팅방 생성) API", description = "사용자가 게시글과 이미지를 함께 등록합니다.(채팅방을 자동 생성합니다.)")
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ChatDtoRes.ChatRoomCreatedResponse> addPost(
+            @RequestPart("post") @Valid PostDtoReq postDtoReq,
+            @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) throws IOException {
+
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        ChatDtoRes.ChatRoomCreatedResponse response = postService.addPost(userId, postDtoReq); // chat 포함해서 한 번에
-        return ApiResponse.of(SuccessStatus._OK, response);
+        return ApiResponse.onSuccess(postService.addPost(userId, postDtoReq, postImages));
     }
 
 
@@ -79,10 +85,11 @@ public class PostController {
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, // 기본값 1로 설정
             @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
+        Long userId = jwtTokenProvider.getUserIdFromToken();
         // 페이지 번호를 1-based에서 0-based로 변환
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
-        return ApiResponse.onSuccess(postService.searchPosts(keyword, adjustedPageable));
+        return ApiResponse.onSuccess(postService.searchPosts(userId, keyword, adjustedPageable));
 
     }
 
