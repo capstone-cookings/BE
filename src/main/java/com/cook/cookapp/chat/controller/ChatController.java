@@ -21,6 +21,7 @@ public class ChatController {
     private final ChatService chatService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Deprecated
     @Operation(summary = "채팅방 생성 API", description = "사용자가 새로운 채팅방을 생성합니다.")
     @PostMapping("/room")
     public ApiResponse<ChatDtoRes.ChatRoomResponse> createRoom(@Valid @RequestBody ChatDtoReq.ChatRoomCreateRequest request) {

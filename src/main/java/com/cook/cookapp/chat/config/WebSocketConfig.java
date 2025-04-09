@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     // 메시지 브로커 설정
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/sub"); // 구독 prefix
+        registry.enableSimpleBroker("/sub"); // 구독 prefix (SimpleBroker: 메시지 브로커- Spring 내장)
         registry.setApplicationDestinationPrefixes("/pub"); // 발행 prefix
     }
 

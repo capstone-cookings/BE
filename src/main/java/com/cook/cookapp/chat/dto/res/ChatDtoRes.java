@@ -30,6 +30,8 @@ public class ChatDtoRes {
 
         private int unreadCount; //안 읽은 메시지 수
         private boolean isActive; //활성화 여부
+        private boolean isHost; //방장 여부
+        private LocalDateTime createdAt; //생성 시간
     }
 
     @Getter

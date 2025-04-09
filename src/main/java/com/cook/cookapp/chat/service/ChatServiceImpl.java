@@ -137,6 +137,8 @@ public class ChatServiceImpl implements ChatService {
                     .lastMessageTime(lastMessage != null ? lastMessage.getSentAt() : null)
                     .unreadCount(unreadCount)
                     .isActive(room.isActive())
+                    .isHost(room.getHostUserId().equals(userId))
+                    .createdAt(room.getCreatedAt())
                     .build());
         }
 
