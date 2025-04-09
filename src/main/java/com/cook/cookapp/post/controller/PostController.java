@@ -1,12 +1,12 @@
 package com.cook.cookapp.post.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
+import com.cook.cookapp.apiPayload.code.status.SuccessStatus;
+import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.service.PostService;
-import com.cook.cookapp.post.service.PostServiceImpl;
-import com.cook.cookapp.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -28,10 +28,10 @@ public class PostController {
 
     @Operation(summary = "게시글 등록 API", description = "사용자가 게시글을 등록합니다")
     @PostMapping("")
-    public ApiResponse<String> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
+    public ApiResponse<ChatDtoRes.ChatRoomCreatedResponse> addPost(@RequestBody @Valid PostDtoReq postDtoReq) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        postService.addPost(userId, postDtoReq);
-        return ApiResponse.onSuccess("게시글을 등록하였습니다");
+        ChatDtoRes.ChatRoomCreatedResponse response = postService.addPost(userId, postDtoReq); // chat 포함해서 한 번에
+        return ApiResponse.of(SuccessStatus._OK, response);
     }
 
 

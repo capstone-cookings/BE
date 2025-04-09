@@ -4,11 +4,13 @@ import com.cook.cookapp.chat.dto.req.ChatDtoReq;
 import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.chat.entity.ChatMessage;
 import com.cook.cookapp.chat.entity.ChatRoom;
+import com.cook.cookapp.post.entity.Post;
 
 import java.util.List;
 
 public interface ChatService {
-    ChatDtoRes.ChatRoomResponse createChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request);
+    ChatDtoRes.ChatRoomResponse testCreateChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request);
+    ChatDtoRes.ChatRoomCreatedResponse createChatRoom(Long userId, Post post);
     ChatDtoRes.ChatRoomResponse getRoomById(Long roomId);
     ChatDtoRes.ChatRoomResponse joinRoom(Long userId, Long roomId);
     List<ChatDtoRes.ChatRoomListItemResponse> getMyChatRooms(Long userId); // 참여한 방 목록만

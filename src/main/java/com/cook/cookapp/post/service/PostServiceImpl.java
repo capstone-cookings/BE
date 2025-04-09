@@ -3,13 +3,14 @@ package com.cook.cookapp.post.service;
 
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
+import com.cook.cookapp.chat.dto.res.ChatDtoRes;
+import com.cook.cookapp.chat.service.ChatService;
 import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.converter.PostConverter;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.entity.Post;
 import com.cook.cookapp.post.repository.PostRepository;
-import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -30,12 +31,16 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final PostConverter postConverter;
     private final AmazonS3Util amazonS3Util;
+    private final ChatService chatService;
 
     @Override
-    public void addPost(Long userId, PostDtoReq postDtoReq) {
+    public ChatDtoRes.ChatRoomCreatedResponse addPost(Long userId, PostDtoReq postDtoReq) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-        postRepository.save(postConverter.toEntity(postDtoReq,user));
+        Post savedPost = postRepository.save(postConverter.toEntity(postDtoReq,user));
+
+        // 채팅방 생성까지 한 번에
+        return chatService.createChatRoom(userId, savedPost);
     }
 
     @Override
