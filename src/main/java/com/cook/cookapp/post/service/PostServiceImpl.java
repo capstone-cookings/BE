@@ -92,8 +92,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostResDto.UserPostRes> searchPosts(Long userId, String keyword, Pageable pageable){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(USER_NOT_FOUND));
         saveSearchHistory(userId, keyword);
-        Page<Post> post = postRepository.findByTitleContaining(keyword, pageable);
+        Page<Post> post = postRepository.findByKeywordAndRegion(keyword, user.getDistrict(), user.getNeighborhood(), pageable);
         return post.map(p -> postConverter.toDto(p,userId));
     }
 
