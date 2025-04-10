@@ -1,5 +1,8 @@
 # Server
 캡스톤 cook 서버 레포지토리입니다.
+### AWS Server
+
+![스크린샷 2025-04-10 183244](https://github.com/user-attachments/assets/c61da1fa-f69f-4c78-9b87-c70adf12d562)
 
 ### ✉️ Commit Messge Rules
   - 반영사항을 바로 확인할 수 있도록 작은 기능 하나라도 구현되면 커밋을 권장합니다.
