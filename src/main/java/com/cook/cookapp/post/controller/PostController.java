@@ -1,7 +1,6 @@
 package com.cook.cookapp.post.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
-import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
@@ -32,12 +31,13 @@ public class PostController {
 
     @Operation(summary = "게시글 등록(채팅방 생성) API", description = "사용자가 게시글과 이미지를 함께 등록합니다.(채팅방을 자동 생성합니다.)")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ChatDtoRes.ChatRoomCreatedResponse> addPost(
+    public ApiResponse<String> addPost(
             @RequestPart("post") @Valid PostDtoReq postDtoReq,
             @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) throws IOException {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        return ApiResponse.onSuccess(postService.addPost(userId, postDtoReq, postImages));
+        postService.addPost(userId, postDtoReq, postImages);
+        return ApiResponse.onSuccess("게시글(채팅방) 생성완료");
     }
 
 

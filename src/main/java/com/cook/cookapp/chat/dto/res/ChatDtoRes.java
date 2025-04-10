@@ -20,24 +20,6 @@ public class ChatDtoRes {
 
     @Getter
     @Builder
-    public static class ChatRoomCreatedResponse {
-        private Long roomId; // 채팅방 ID
-        private String name; //채팅방 이름
-        private int currentParticipants; //현재 참여자 수
-        private int maxParticipants; //최대 참여자 수
-        private boolean isActive; //활성화 여부
-        private PostInfo post; // 게시글 정보 추가
-    }
-
-    @Getter
-    @Builder
-    public static class PostInfo {
-        private Long postId; //게시글 ID
-        private String title; //게시글 제목
-    }
-
-    @Getter
-    @Builder
     public static class ChatRoomListItemResponse {
         private Long roomId; // 채팅방 ID
         private String name; //채팅방 이름

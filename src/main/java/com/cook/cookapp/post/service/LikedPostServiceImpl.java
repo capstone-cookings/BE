@@ -2,6 +2,8 @@ package com.cook.cookapp.post.service;
 
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
+import com.cook.cookapp.chat.entity.ChatRoom;
+import com.cook.cookapp.chat.repository.ChatRoomRepository;
 import com.cook.cookapp.post.converter.PostConverter;
 import com.cook.cookapp.post.dto.res.PostResDto;
 import com.cook.cookapp.post.entity.LikedPost;
@@ -24,6 +26,7 @@ public class LikedPostServiceImpl implements LikedPostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostConverter postConverter;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     public PostResDto.likedRes likePost(Long userId, Long postId) {
@@ -54,6 +57,11 @@ public class LikedPostServiceImpl implements LikedPostService {
 
     public Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable) {
         return likedPostRepository.findByUserId(userId, pageable)
-                .map(likedPost -> postConverter.toDto(likedPost.getPost(),userId));
+                .map(likedPost -> {
+                    Post post = likedPost.getPost();
+                    ChatRoom chatRoom = chatRoomRepository.findByPostId(post.getId())
+                            .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+                    return postConverter.toDto(post, userId, chatRoom);
+                });
     }
 }

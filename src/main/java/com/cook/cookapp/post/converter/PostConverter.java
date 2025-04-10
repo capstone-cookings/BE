@@ -1,5 +1,6 @@
 package com.cook.cookapp.post.converter;
 
+import com.cook.cookapp.chat.entity.ChatRoom;
 import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.dto.req.PostDtoReq;
 import com.cook.cookapp.post.dto.res.PostResDto;
@@ -36,7 +37,7 @@ public class PostConverter {
 
     }
 
-    public PostResDto.UserPostRes toDto(Post post,Long userId) {
+    public PostResDto.UserPostRes toDto(Post post,Long userId, ChatRoom chatRoom) {
         boolean isLiked = likedPostRepository.existsByUserIdAndPostId(userId,post.getId());
         PostResDto.UserPostRes userPostRes = PostResDto.UserPostRes.builder()
                 .id(post.getId())
@@ -48,12 +49,14 @@ public class PostConverter {
                 .timeAgo(calTime(post.getUpdatedAt()))
                 .likeCount(post.getLikeCount())
                 .liked(isLiked)
+                .isRoomActive(chatRoom.isActive())
+                .currentParticipants(chatRoom.getCurrentParticipants())
                 .build();
         userPostRes.setImageUrls(amazonS3Util.getPostPath(post.getId()));
         return userPostRes;
     }
 
-    public PostResDto.SpecPostRes toSpecDto(Post post, Long userId) {
+    public PostResDto.SpecPostRes toSpecDto(Post post, Long userId, ChatRoom chatRoom) {
         boolean isLiked = likedPostRepository.existsByUserIdAndPostId(userId, post.getId());
 
         List<String> imageUrls = amazonS3Util.getPostPath(post.getId());
@@ -82,6 +85,9 @@ public class PostConverter {
                 .likeCount(post.getLikeCount())
                 .image(imageList)
                 .profileImageUrl(amazonS3Util.getProfilePath(post.getUser().getId()))
+                .chatRoomId(chatRoom.getId())
+                .isRoomActive(chatRoom.isActive())
+                .currentParticipants(chatRoom.getCurrentParticipants())
                 .build();
     }
 
