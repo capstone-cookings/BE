@@ -4,6 +4,8 @@ package com.cook.cookapp.post.service;
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.chat.dto.res.ChatDtoRes;
+import com.cook.cookapp.chat.entity.ChatRoom;
+import com.cook.cookapp.chat.repository.ChatRoomRepository;
 import com.cook.cookapp.chat.service.ChatService;
 import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.converter.PostConverter;
@@ -41,10 +43,11 @@ public class PostServiceImpl implements PostService {
     private final AmazonS3Util amazonS3Util;
     private final SearchHistoryRepository searchHistoryRepository;
     private final ChatService chatService;
+    private final ChatRoomRepository chatRoomRepository;
 
     // 게시글 등록(채팅방 생성)
     @Override
-    public ChatDtoRes.ChatRoomCreatedResponse addPost(Long userId, PostDtoReq postDtoReq, List<MultipartFile> postImages) throws IOException {
+    public void addPost(Long userId, PostDtoReq postDtoReq, List<MultipartFile> postImages) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
@@ -55,21 +58,26 @@ public class PostServiceImpl implements PostService {
         }
 
         // 채팅방 생성까지 한 번에
-        return chatService.createChatRoom(userId, savedPost);
+        chatService.createChatRoom(userId, savedPost);
     }
 
     //내가 쓴 글 조회
     @Override
     public Page<PostResDto.UserPostRes> findByUserId(Long userId, Pageable pageable) {
-        Page<Post> post = postRepository.findByUserId(userId, pageable);
-        return post.map(p -> postConverter.toDto(p,userId));
-
+        Page<Post> posts = postRepository.findByUserId(userId, pageable);
+        return posts.map(post -> {
+            ChatRoom chatRoom = chatRoomRepository.findByPostId(post.getId())
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+            return postConverter.toDto(post, userId, chatRoom);});
     }
 
     @Override
     public PostResDto.SpecPostRes getPostById(Long postId,Long userId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new GeneralException(ErrorStatus.POST_NOT_FOUND));
-        return postConverter.toSpecDto(post,userId);
+        ChatRoom chatRoom = chatRoomRepository.findByPostId(post.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+
+        return postConverter.toSpecDto(post,userId,chatRoom);
     }
 
     @Override
@@ -92,9 +100,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostResDto.UserPostRes> searchPosts(Long userId, String keyword, Pageable pageable){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(USER_NOT_FOUND));
         saveSearchHistory(userId, keyword);
-        Page<Post> post = postRepository.findByTitleContaining(keyword, pageable);
-        return post.map(p -> postConverter.toDto(p,userId));
+        Page<Post> posts = postRepository.findByKeywordAndRegion(keyword, user.getDistrict(), user.getNeighborhood(), pageable);
+        return posts.map(post -> {
+            ChatRoom chatRoom = chatRoomRepository.findByPostId(post.getId())
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));
+            return postConverter.toDto(post, userId, chatRoom);});
     }
 
     public void saveSearchHistory(Long userId, String keyword){

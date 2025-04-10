@@ -9,8 +9,8 @@ import com.cook.cookapp.post.entity.Post;
 import java.util.List;
 
 public interface ChatService {
-    ChatDtoRes.ChatRoomResponse testCreateChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request);
-    ChatDtoRes.ChatRoomCreatedResponse createChatRoom(Long userId, Post post);
+    //ChatDtoRes.ChatRoomResponse testCreateChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request);
+    void createChatRoom(Long userId, Post post);
     ChatDtoRes.ChatRoomResponse getRoomById(Long roomId);
     ChatDtoRes.ChatRoomResponse joinRoom(Long userId, Long roomId);
     List<ChatDtoRes.ChatRoomListItemResponse> getMyChatRooms(Long userId); // 참여한 방 목록만
