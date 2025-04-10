@@ -42,42 +42,30 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRoomRedisService chatRoomRedisService;
     private final SimpMessagingTemplate messagingTemplate;
 
+//    @Override
+//    public ChatDtoRes.ChatRoomResponse testCreateChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request) {
+//        ChatRoom chatRoom = ChatRoom.create(request.getName(), userId, request.getMaxParticipants());
+//        ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
+//
+//        // 생성자 자동 참여 처리
+//        participantRepository.save(new ChatRoomParticipant(userId, savedRoom.getId()));
+//
+//        return ChatDtoRes.ChatRoomResponse.builder()
+//                .roomId(savedRoom.getId())
+//                .name(savedRoom.getName())
+//                .currentParticipants(savedRoom.getCurrentParticipants())
+//                .maxParticipants(savedRoom.getMaxParticipants())
+//                .isActive(savedRoom.isActive())
+//                .build();
+//    }
+
     @Override
-    public ChatDtoRes.ChatRoomResponse testCreateChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request) {
-        ChatRoom chatRoom = ChatRoom.create(request.getName(), userId, request.getMaxParticipants());
+    public void createChatRoom(Long userId, Post post) {
+        ChatRoom chatRoom = ChatRoom.create(post.getTitle(), userId, post.getMemberCount(), post.getId());
         ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
 
         // 생성자 자동 참여 처리
         participantRepository.save(new ChatRoomParticipant(userId, savedRoom.getId()));
-
-        return ChatDtoRes.ChatRoomResponse.builder()
-                .roomId(savedRoom.getId())
-                .name(savedRoom.getName())
-                .currentParticipants(savedRoom.getCurrentParticipants())
-                .maxParticipants(savedRoom.getMaxParticipants())
-                .isActive(savedRoom.isActive())
-                .build();
-    }
-
-    @Override
-    public ChatDtoRes.ChatRoomCreatedResponse createChatRoom(Long userId, Post post) {
-        ChatRoom chatRoom = ChatRoom.create(post.getTitle(), userId, post.getMemberCount());
-        ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
-
-        // 생성자 자동 참여 처리
-        participantRepository.save(new ChatRoomParticipant(userId, savedRoom.getId()));
-
-        return ChatDtoRes.ChatRoomCreatedResponse.builder()
-                .roomId(savedRoom.getId())
-                .name(savedRoom.getName())
-                .currentParticipants(savedRoom.getCurrentParticipants())
-                .maxParticipants(savedRoom.getMaxParticipants())
-                .isActive(savedRoom.isActive())
-                .post(ChatDtoRes.PostInfo.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .build())
-                .build();
     }
 
     @Override

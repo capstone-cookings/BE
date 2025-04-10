@@ -29,6 +29,8 @@ public class PostResDto {
         private String neighborhood;
         private List<String> imageUrls;
         private boolean liked;
+        private boolean isRoomActive; // 채팅방 활성화 여부
+        private int currentParticipants; // 현재 참여자 수
     }
 
     @Data
@@ -50,6 +52,9 @@ public class PostResDto {
         private boolean liked;
         private List<SpecPostImageRes> image;
         private String profileImageUrl;
+        private Long chatRoomId;
+        private boolean isRoomActive;
+        private int currentParticipants;
     }
 
     @Data

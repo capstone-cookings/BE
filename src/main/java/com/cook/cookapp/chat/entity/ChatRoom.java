@@ -16,7 +16,9 @@ public class ChatRoom extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 채팅방 ID
+
+    private Long postId; // 게시글 ID
 
     private String name; // 채팅방 이름 (예: '떡볶이 공동구매방')
 
@@ -31,8 +33,9 @@ public class ChatRoom extends BaseEntity {
     private int maxParticipants;
 
     // === 채팅방 생성 메서드 ===
-    public static ChatRoom create(String name, Long hostUserId, int maxParticipants) {
+    public static ChatRoom create(String name, Long hostUserId, int maxParticipants, Long postId) {
         ChatRoom room = new ChatRoom();
+        room.postId = postId; // 게시글 ID
         room.name = name;
         room.hostUserId = hostUserId;
         room.currentParticipants = 1; // 생성자 자동 참여
