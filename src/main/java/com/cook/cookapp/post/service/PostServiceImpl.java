@@ -56,6 +56,7 @@ public class PostServiceImpl implements PostService {
         if (postImages != null && !postImages.isEmpty()) {
             amazonS3Util.uploadPostImages(postImages, savedPost);  // 기존 postImageUpload에서 remainImageUrls 없는 버전
         }
+
         // 채팅방 생성까지 한 번에
         chatService.createChatRoom(userId, savedPost);
     }
@@ -99,8 +100,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostResDto.UserPostRes> searchPosts(Long userId, String keyword, Pageable pageable){
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(USER_NOT_FOUND));
         saveSearchHistory(userId, keyword);
-        Page<Post> posts = postRepository.findByTitleContaining(keyword, pageable);
+        Page<Post> posts = postRepository.findByKeywordAndRegion(keyword, user.getDistrict(), user.getNeighborhood(), pageable);
         return posts.map(post -> {
             ChatRoom chatRoom = chatRoomRepository.findByPostId(post.getId())
                     .orElseThrow(() -> new GeneralException(ErrorStatus.CHATROOM_NOT_FOUND));

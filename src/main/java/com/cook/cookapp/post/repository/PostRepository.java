@@ -14,6 +14,13 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUserId(Long userId, Pageable pageable);
     Optional<Post> findByIdAndUserId(Long postId, Long userId);
-    @Query("SELECT p FROM Post p WHERE :keyword IS NULL OR :keyword = '' OR p.title LIKE %:keyword%")
-    Page<Post> findByTitleContaining(@Param("keyword") String keyword, Pageable pageable);
+    @Query("""
+    SELECT p FROM Post p WHERE (:keyword IS NULL OR :keyword = '' OR p.title LIKE %:keyword%) AND p.user.district = :district  AND p.user.neighborhood = :neighborhood
+""")
+    Page<Post> findByKeywordAndRegion(
+            @Param("keyword") String keyword,
+            @Param("district") String district,
+            @Param("neighborhood") String neighborhood,
+            Pageable pageable
+    );
 }
