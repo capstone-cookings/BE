@@ -4,10 +4,14 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
+import com.cook.cookapp.ingredient.entity.Ingredient;
+import com.cook.cookapp.ingredient.repository.IngredientImageRepository;
+import com.cook.cookapp.ingredient.repository.IngredientRepository;
 import com.cook.cookapp.post.entity.Post;
 import com.cook.cookapp.post.entity.PostImage;
 import com.cook.cookapp.post.repository.PostImageRepository;
 import com.cook.cookapp.post.repository.PostRepository;
+import com.cook.cookapp.ingredient.entity.IngredientImage;
 import com.cook.cookapp.recipe.entity.Recipe;
 import com.cook.cookapp.recipe.entity.RecipeImage;
 import com.cook.cookapp.recipe.repository.RecipeImageRepository;
@@ -47,7 +51,9 @@ public class AmazonS3Util {
     final long MAX_FILE_SIZE = 5 * 1024 * 1024;
     private final RecipeImageRepository recipeImageRepository;
     private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
     private final PostImageRepository postImageRepository;
+    private final IngredientImageRepository ingredientImageRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -58,8 +64,14 @@ public class AmazonS3Util {
     @Value("${cloud.aws.s3.path.recipe}")
     private String recipePath;
 
+    @Value("${cloud.aws.s3.path.ingredient}")
+    private String ingredientPath;
+
     @Value("${cloud.aws.s3.path.post}")
     private String postPath;
+
+    @Value("${cloud.aws.s3.path.trustlevel}")
+    private String trustlevelPath;
 
     //프로필 이미지 업로드
     //db에 있는걸 먼저 찾고 s3를 삭제한 후 디비 데이터를 삭제해주시면 됩니다!
@@ -173,6 +185,57 @@ public class AmazonS3Util {
         }
     }
 
+    @Transactional
+    public void ingredientImageUpload(MultipartFile multipartFile,Long ingredientId, Long userId) throws IOException {
+
+        String contentType = multipartFile.getContentType();
+        //용량 5MB이하만 받도록 제한
+        if(multipartFile.getSize() > MAX_FILE_SIZE) {
+            throw new GeneralException(ErrorStatus.FILE_TOO_LARGE);
+        }
+
+        //이미지 파일만 받도록 제한
+        if(contentType == null || !contentType.startsWith("image/") ){
+            throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+        } else {
+            Ingredient ingredient = ingredientRepository.findById(ingredientId).orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
+            IngredientImage existingIngredientImage = ingredientImageRepository.findByIngredient(ingredient);
+
+            // 기존 이미지 삭제
+            if (existingIngredientImage != null) {
+                ingredient.setIngredientImage(null);
+                ingredientRepository.save(ingredient);
+                String existingKey = ingredientPath + "/" + existingIngredientImage.getUuid() + "_" + existingIngredientImage.getOriginalFilename();
+                amazonS3Client.deleteObject(bucket, existingKey);  // S3에서 삭제
+                ingredientImageRepository.delete(existingIngredientImage);  // DB에서 삭제
+                ingredientImageRepository.flush();
+            }
+
+
+            // 새 이미지 업로드
+            String uuid = UUID.randomUUID().toString();
+            String key = ingredientPath + "/" + uuid + "_" + multipartFile.getOriginalFilename();
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getSize());
+            metadata.setContentType(multipartFile.getContentType());
+            // S3에 업로드
+            amazonS3Client.putObject(bucket, key, multipartFile.getInputStream(), metadata);
+
+            IngredientImage newIngredientImage = IngredientImage.builder()
+                    .uuid(uuid)
+                    .originalFilename(multipartFile.getOriginalFilename())
+                    .contentType(multipartFile.getContentType())
+                    .fileSize(multipartFile.getSize())
+                    .ingredient(ingredient)
+                    .build();
+
+            ingredient.setIngredientImage(newIngredientImage);
+            ingredientRepository.save(ingredient);
+            ingredientImageRepository.save(newIngredientImage);
+        }
+    }
+
     //프로필 이미지 url 가져오기
     public String getProfilePath(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다."));
@@ -181,6 +244,12 @@ public class AmazonS3Util {
             return null;
         }
         return amazonS3.getUrl(bucket, profilePath + "/" + profileImage.getUuid() + "_" + profileImage.getOriginalFilename()).toString();
+    }
+
+    public String getTrustLevelPath(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다."));
+
+        return amazonS3.getUrl(bucket, trustlevelPath + "/" + user.getTrustLevel() + ".png").toString();
     }
 
     //레시피 이미지 url 가져오기
@@ -193,6 +262,17 @@ public class AmazonS3Util {
         }
 
         return amazonS3.getUrl(bucket, recipePath + "/" + recipeImage.getUuid() + "_" + recipeImage.getOriginalFilename()).toString();
+    }
+
+    //식재료 이미지 url 가져오기
+    public String getIngredientPath(Long ingredientId) {
+        Ingredient ingredient = ingredientRepository.findById(ingredientId).orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
+        IngredientImage ingredientImage = ingredientImageRepository.findByIngredient(ingredient);
+        if(ingredientImage == null){
+            return null;
+        }
+
+        return amazonS3.getUrl(bucket, ingredientPath + "/" + ingredientImage.getUuid() + "_" + ingredientImage.getOriginalFilename()).toString();
     }
 
     public List<String> getPostPath(Long postId) {

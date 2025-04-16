@@ -13,7 +13,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 
 @RestController
 @RequestMapping("/api/ingredient")
@@ -24,10 +27,11 @@ public class IngredientController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "식재료 등록 API", description = "사용자가 식재료를 저장소에 추가합니다.")
-    @PostMapping
-    public ApiResponse<String> addIngredient(@RequestBody @Valid IngredientDtoReq ingredientDtoReq) {
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<String> addIngredient(@RequestPart @Valid IngredientDtoReq ingredientDtoReq,
+                                             @RequestPart(value = "ingredientImage", required = false) MultipartFile ingredientImage) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        ingredientService.addIngredient(userId, ingredientDtoReq);
+        ingredientService.addIngredient(userId, ingredientDtoReq,ingredientImage);
         return ApiResponse.onSuccess("식재료가 추가되었습니다.");
     }
 
