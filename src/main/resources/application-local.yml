@@ -55,7 +55,9 @@ cloud:
       path:
         profile: profile
         post: post
+        ingredient: ingredient
         recipe: recipe
+        trustlevel: trustlevel
       bucket: ${AWS_S3_BUCKET}
     region:
       static: ap-northeast-2

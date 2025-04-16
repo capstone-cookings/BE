@@ -3,6 +3,7 @@ package com.cook.cookapp.ingredient.service;
 
 import com.cook.cookapp.apiPayload.code.exception.GeneralException;
 import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
+import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.ingredient.converter.IngredientConverter;
 import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
 import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
@@ -16,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @Service
@@ -25,14 +29,20 @@ public class IngredientServiceImpl implements IngredientService{
     private final IngredientRepository ingredientRepository;
     private final UserRepository userRepository;
     private final IngredientConverter ingredientConverter;
+    private final AmazonS3Util amazonS3Util;
+
 
     @Override
-    public void addIngredient(Long userId, IngredientDtoReq ingredientDtoReq) {
+    public void addIngredient(Long userId, IngredientDtoReq ingredientDtoReq, MultipartFile ingredientImage) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
         Ingredient ingredient = ingredientConverter.toEntity(ingredientDtoReq, user);
         ingredientRepository.save(ingredient);
+        try {
+            amazonS3Util.ingredientImageUpload(ingredientImage, ingredient.getId(), userId);
+        } catch (IOException e) {
+            throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
+        }
     }
 
     @Override

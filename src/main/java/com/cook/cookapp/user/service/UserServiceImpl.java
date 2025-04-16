@@ -10,6 +10,7 @@ import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
 import com.cook.cookapp.user.entity.User;
+import com.cook.cookapp.user.repository.ReportRepository;
 import com.cook.cookapp.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @Transactional
@@ -28,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final AmazonS3Util amazonS3Util;
+    private final ReportRepository reportRepository;
 
     // 일반 로그인 처리: 이메일로 유저 찾고 토큰 발급
     public UserDtoRes.UserLoginRes login(HttpServletRequest request, HttpServletResponse response, UserDtoReq.LoginReq loginDto) {
@@ -96,11 +99,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         String imageUrl = amazonS3Util.getProfilePath(userId);
+        String trustLevelImageUrl = amazonS3Util.getTrustLevelPath(userId);
 
         return UserDtoRes.UserProfileRes.builder()
+                .id(user.getId())
                 .imageUrl(imageUrl)
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .trustLevelImageUrl(trustLevelImageUrl)
+                .trustLevel(user.getTrustLevel().toString())
                 .build();
     }
 
@@ -110,11 +117,15 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         String imageUrl = amazonS3Util.getProfilePath(user.getId());
+        String trustLevelImageUrl = amazonS3Util.getTrustLevelPath(user.getId());
 
         return UserDtoRes.UserProfileRes.builder()
+                .id(user.getId())
                 .imageUrl(imageUrl)
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .trustLevelImageUrl(trustLevelImageUrl)
+                .trustLevel(user.getTrustLevel().toString())
                 .build();
 
     }

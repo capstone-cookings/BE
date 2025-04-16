@@ -45,6 +45,10 @@ public class Ingredient extends BaseEntity {
     @Column(nullable = false)
     private AlarmStatus alarmStatus = AlarmStatus.ON;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JoinColumn(name = "ingredient_id")
+    private IngredientImage ingredientImage;
+
     // 저장 타입 (냉장, 냉동) - 기본값 냉장.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

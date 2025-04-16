@@ -14,6 +14,7 @@ import java.time.ZoneId;
 public class IngredientDtoRes {
     private Long id;
     private String foodName;
+    private String imageUrl;
     private Long useByDate;
     private int count;
     private boolean storageType;
