@@ -10,9 +10,9 @@ import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
 import com.cook.cookapp.user.entity.User;
+import com.cook.cookapp.user.repository.UserRepository;
 import com.cook.cookapp.user.service.KakaoService;
 import com.cook.cookapp.user.service.UserService;
-import com.cook.cookapp.user.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,6 +31,7 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoService kakaoService;
+    private final UserRepository userRepository;
 
     @Operation(summary = "앱 카카오로그인 API", description = "앱에서 카카오 로그인")
     @PostMapping("/kakao-login")
@@ -173,5 +174,14 @@ public class UserController {
         String tastePreference = userService.getTastePreference(userId);
         return ApiResponse.onSuccess(new UserDtoRes.TastePreferenceRes(tastePreference));
     }
+
+//    @Operation(summary = "사용자 칭찬 API", description = "다른사용자에게 칭찬합니다")
+//    @PostMapping("/compliment")
+//    public ApiResponse<String> complimentUser() {
+//        Long userId = jwtTokenProvider.getUserIdFromToken();
+//        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+//        userService.addTrustScore(userId);
+//        return ApiResponse.onSuccess("사용자를 칭찬합니다");
+//    }
 
 }

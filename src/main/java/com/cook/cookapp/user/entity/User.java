@@ -12,6 +12,8 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cook.cookapp.user.entity.TrustLevel.BeginnerChef;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,10 +39,6 @@ public class User extends BaseEntity {
     @Column(length = 100, unique = true)
     private String email;
 
-    //경험치
-    @Column
-    private Long exp;
-
     //음식 취향
     @Column(length = 100)
     private String tastePreference;
@@ -52,6 +50,13 @@ public class User extends BaseEntity {
     //지역 동
     @Column(length = 20)
     private String neighborhood;
+
+    @Column(nullable = false)
+    private int trustScore = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TrustLevel trustLevel = BeginnerChef;
 
     //식재료 리스트
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -69,5 +74,22 @@ public class User extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(name = "profileImage_id")
     private ProfileImage profileImage;
+
+    public TrustLevel updateTrustLevel() {
+        if (trustScore >= 50) {
+            this.trustLevel = TrustLevel.MasterChef;
+        } else if (trustScore >= 30) {
+            this.trustLevel = TrustLevel.HeadChef;
+        } else if (trustScore >= 15) {
+            this.trustLevel = TrustLevel.SousChef;
+        } else if (trustScore >= 5) {
+            this.trustLevel = TrustLevel.HomeCook;
+        } else {
+            this.trustLevel = TrustLevel.BeginnerChef;
+        }
+        return this.trustLevel;
+    }
+
+
 }
 

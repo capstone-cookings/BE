@@ -1,5 +1,8 @@
 # Server
 캡스톤 cook 서버 레포지토리입니다.
+### AWS Server (CI/CD 무중단 배포(RollingWithAdditionalBatch 방식)) 
+
+![image](https://github.com/user-attachments/assets/2e5ea6ca-d1f3-4c51-a90c-a2dc17f1d9bf)
 
 ### ✉️ Commit Messge Rules
   - 반영사항을 바로 확인할 수 있도록 작은 기능 하나라도 구현되면 커밋을 권장합니다.

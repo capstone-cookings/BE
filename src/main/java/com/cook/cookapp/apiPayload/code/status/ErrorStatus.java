@@ -74,6 +74,9 @@ public enum ErrorStatus implements BaseErrorCode {
     NO_EXISTS_SEARCH_HISTORY(HttpStatus.NOT_FOUND, "HISTORY4001", "검색어가 존재하지 않습니다"),
     NO_EXISTS_USER_SEARCH_HISTORY(HttpStatus.NOT_FOUND, "HISTORY4002", "해당 사용자가 검색한 기록이 없습니다"),
 
+    //신고 관련
+    CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "REPORT4000", "자기 자신을 신고할 수 없습니다"),
+    ALREADY_REPORTED_TODAY(HttpStatus.BAD_REQUEST, "REQUEST4001", "오늘 이미 신고한 유저입니다"),
     // Chat
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4001", "채팅방을 찾을 수 없습니다."),
     UNAUTHORIZED_CHAT_ACCESS(HttpStatus.FORBIDDEN, "CHAT4002", "해당 채팅방에 접근할 권한이 없습니다."),

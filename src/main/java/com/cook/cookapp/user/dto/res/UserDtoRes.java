@@ -29,9 +29,12 @@ public class UserDtoRes {
     @AllArgsConstructor
     @Builder
     public static class UserProfileRes {
+        private Long id;
         private String email;
         private String nickname;
         private String imageUrl;
+        private String trustLevelImageUrl;
+        private String trustLevel;
     }
     @Getter
     @NoArgsConstructor
