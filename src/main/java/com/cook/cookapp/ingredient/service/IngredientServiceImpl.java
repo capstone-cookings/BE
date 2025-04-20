@@ -38,10 +38,12 @@ public class IngredientServiceImpl implements IngredientService{
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         Ingredient ingredient = ingredientConverter.toEntity(ingredientDtoReq, user);
         ingredientRepository.save(ingredient);
-        try {
-            amazonS3Util.ingredientImageUpload(ingredientImage, ingredient.getId(), userId);
-        } catch (IOException e) {
-            throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
+        if (ingredientImage != null && !ingredientImage.isEmpty()) {
+            try {
+                amazonS3Util.ingredientImageUpload(ingredientImage, ingredient.getId(), userId);
+            } catch (IOException e) {
+                throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
+            }
         }
     }
 
