@@ -75,6 +75,11 @@ public class User extends BaseEntity {
     @JoinColumn(name = "profileImage_id")
     private ProfileImage profileImage;
 
+    @PrePersist
+    public void prePersist(){
+        if(this.trustLevel ==null) this.trustLevel = BeginnerChef;
+    }
+
     public TrustLevel updateTrustLevel() {
         if (trustScore >= 50) {
             this.trustLevel = TrustLevel.MasterChef;
