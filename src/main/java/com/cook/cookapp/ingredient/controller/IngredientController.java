@@ -62,10 +62,12 @@ public class IngredientController {
     }
 
     @Operation(summary = "식재료 수정 API", description = "사용자가 저장한 특정 식재료의 정보를 수정합니다.")
-    @PatchMapping("/{ingredientId}")
-    public ApiResponse<String> updateIngredient(@PathVariable Long ingredientId, @RequestBody @Valid IngredientDtoReq ingredientDtoReq) {
+    @PatchMapping(value = "/{ingredientId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<String> updateIngredient(@PathVariable Long ingredientId,
+                                                @RequestPart @Valid IngredientDtoReq ingredientDtoReq,
+                                                @RequestPart(value = "ingredientImage", required = false) MultipartFile ingredientImage) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
-        ingredientService.updateIngredient(userId, ingredientId, ingredientDtoReq);
+        ingredientService.updateIngredient(userId, ingredientId, ingredientDtoReq,ingredientImage);
         return ApiResponse.onSuccess("식재료 정보가 수정되었습니다.");
     }
 
