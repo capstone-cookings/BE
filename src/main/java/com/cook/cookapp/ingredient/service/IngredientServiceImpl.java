@@ -68,12 +68,19 @@ public class IngredientServiceImpl implements IngredientService{
     }
 
     @Override
-    public void updateIngredient(Long userId, Long ingredientId, IngredientDtoReq ingredientDtoReq) {
+    public void updateIngredient(Long userId, Long ingredientId, IngredientDtoReq ingredientDtoReq, MultipartFile ingredientImage) {
         Ingredient ingredient = ingredientRepository.findByIdAndUserId(ingredientId, userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
 
         ingredient.update(ingredientDtoReq);
-        ingredientRepository.save(ingredient);
+
+        if (ingredientImage != null && !ingredientImage.isEmpty()) {
+            try {
+                amazonS3Util.ingredientImageUpload(ingredientImage, ingredient.getId(), userId);
+            } catch (IOException e) {
+                throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
+            }
+        }
     }
 
     @Override

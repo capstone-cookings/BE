@@ -1,6 +1,5 @@
 package com.cook.cookapp.user.entity;
 
-import com.cook.cookapp.global.BaseEntity;
 
 public enum ComplimentType {
     ON_TIME, // 시간 약속을 잘 지켜요
