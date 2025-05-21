@@ -11,7 +11,7 @@ public interface IngredientService {
     Page<IngredientDtoRes> getAllIngredientsByCreatedAt(Long userId, Pageable pageable);
     Page<IngredientDtoRes> getAllIngredientsByUseByDate(Long userId, Pageable pageable);
     void deleteIngredient(Long userId, Long ingredientId);
-    void updateIngredient(Long userId, Long ingredientId, IngredientDtoReq ingredientDtoReq);
+    void updateIngredient(Long userId, Long ingredientId, IngredientDtoReq ingredientDtoReq, MultipartFile ingredientImage);
     void updateAlarmStatus(Long userId, Long ingredientId, boolean alarmStatus);
     IngredientDtoRes getIngredientById(Long userId, Long ingredientId);
 }
