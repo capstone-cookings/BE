@@ -68,4 +68,4 @@ openai:
 
 firebase:
   config:
-    path: src/main/resources/firebase-service-account.json
+    path: firebase-service-account.json
