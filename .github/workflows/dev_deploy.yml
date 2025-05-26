@@ -40,6 +40,9 @@ jobs:
         run: echo "CurrentTime=${{ steps.current-time.outputs.formattedTime }}"
         shell: bash
 
+      - name: Set env
+        run: echo "FIREBASE_KEY_JSON=${{ secrets.FIREBASE_KEY_JSON }}" >> $GITHUB_ENV
+
       - name: Generate deployment package
         run: |
           mkdir -p deploy
