@@ -23,7 +23,9 @@ jobs:
 
       - name: Write Firebase key file safely
         run: |
-          cat <<EOF > firebase-service-account.json${{ secrets.FIREBASE_KEY_JSON }}EOF
+          cat <<EOF > firebase-service-account.json
+          ${{ secrets.FIREBASE_KEY_JSON }}
+          EOF
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
