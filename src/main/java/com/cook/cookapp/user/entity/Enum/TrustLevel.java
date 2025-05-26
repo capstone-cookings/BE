@@ -1,4 +1,4 @@
-package com.cook.cookapp.user.entity;
+package com.cook.cookapp.user.entity.Enum;
 
 public enum TrustLevel {
     // 초보 요리사

@@ -184,4 +184,12 @@ public class UserController {
 //        return ApiResponse.onSuccess("사용자를 칭찬합니다");
 //    }
 
+    @Operation(summary = "FCM 토큰 저장 API", description = "로그인한 사용자의 FCM 토큰을 저장합니다.")
+    @PostMapping("/fcm-token")
+    public ApiResponse<String> saveFcmToken(@RequestParam String token) {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        userService.updateFcmToken(userId, token);
+        return ApiResponse.onSuccess("FCM 토큰 저장 완료");
+    }
+    //FCM 토큰 삭제 API -> 알림 비활성화 시 호출
 }

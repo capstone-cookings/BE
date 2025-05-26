@@ -38,6 +38,33 @@ public class ChatMessageHandler {
     private final ChatRoomRedisService chatRoomRedisService;
     private final ChatRoomParticipantRepository participantRepository;
 
+    @MessageMapping("/chat/enter")
+    public void enter(ChatReadEventRequest request, Principal principal) {
+        Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
+        Long roomId = request.getRoomId();
+
+        if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
+        }
+
+        chatRoomRedisService.addConnectedUser(roomId, userId);
+        log.info("WebSocket 입장: 유저 {} → 방 {}", userId, roomId);
+    }
+
+    @MessageMapping("/chat/leave")
+    public void leave(ChatReadEventRequest request, Principal principal) {
+        Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
+        Long roomId = request.getRoomId();
+
+        if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
+        }
+
+        chatRoomRedisService.removeConnectedUser(roomId, userId);
+        log.info("WebSocket 퇴장: 유저 {} → 방 {}", userId, roomId);
+    }
+
+
     @MessageMapping("/chat/read")
     public void readMessages(ChatReadEventRequest request, Principal principal) {
         Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);

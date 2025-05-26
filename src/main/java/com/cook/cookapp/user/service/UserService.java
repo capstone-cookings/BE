@@ -23,4 +23,5 @@ public interface UserService {
     UserDtoRes.UserLocationRes getLocation(Long userId);
     void updateNickname(Long userId, String nickname);
     User getUserById(Long id);
+    void updateFcmToken(Long userId, String token);
 }

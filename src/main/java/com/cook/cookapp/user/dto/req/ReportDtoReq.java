@@ -1,6 +1,6 @@
 package com.cook.cookapp.user.dto.req;
 
-import com.cook.cookapp.user.entity.ReportType;
+import com.cook.cookapp.user.entity.Enum.ReportType;
 import lombok.*;
 
 public class ReportDtoReq {
