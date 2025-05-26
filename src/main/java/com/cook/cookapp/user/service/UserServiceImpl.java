@@ -175,4 +175,9 @@ public class UserServiceImpl implements UserService {
         user.setNickname(nickname);
     }
 
+    public void updateFcmToken(Long userId, String token) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        user.setFcmToken(token);
+    }
 }

@@ -1,4 +1,4 @@
-package com.cook.cookapp.common;
+package com.cook.cookapp.common.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;

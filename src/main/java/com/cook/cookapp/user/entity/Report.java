@@ -1,6 +1,7 @@
 package com.cook.cookapp.user.entity;
 
 import com.cook.cookapp.global.BaseEntity;
+import com.cook.cookapp.user.entity.Enum.ReportType;
 import jakarta.persistence.*;
 import lombok.*;
 

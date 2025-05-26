@@ -1,4 +1,4 @@
-package com.cook.cookapp.common;
+package com.cook.cookapp.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

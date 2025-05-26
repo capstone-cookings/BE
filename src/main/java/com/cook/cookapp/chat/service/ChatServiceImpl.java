@@ -11,6 +11,7 @@ import com.cook.cookapp.chat.redis.ChatRoomRedisService;
 import com.cook.cookapp.chat.repository.ChatMessageRepository;
 import com.cook.cookapp.chat.repository.ChatRoomParticipantRepository;
 import com.cook.cookapp.chat.repository.ChatRoomRepository;
+import com.cook.cookapp.global.notification.services.FcmService;
 import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.post.entity.Post;
 import com.cook.cookapp.user.entity.User;
@@ -41,6 +42,7 @@ public class ChatServiceImpl implements ChatService {
     private final UserRepository userRepository;
     private final ChatRoomRedisService chatRoomRedisService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final FcmService fcmService;
 
 //    @Override
 //    public ChatDtoRes.ChatRoomResponse testCreateChatRoom(Long userId, ChatDtoReq.ChatRoomCreateRequest request) {
@@ -248,6 +250,22 @@ public class ChatServiceImpl implements ChatService {
         // 메시지 생성 및 저장
         ChatMessage message = ChatMessage.create(roomId, userId, nickname, request.getContent());
         ChatMessage saved = chatMessageRepository.save(message);
+
+        // FCM 전송 대상 판단
+        List<Long> connectedUserIds = chatRoomRedisService.getConnectedUserIds(roomId); // Redis 기반 WebSocket 연결 목록
+        List<ChatRoomParticipant> participants = participantRepository.findAllByRoomId(roomId);
+
+        for (ChatRoomParticipant participant : participants) {
+            Long targetUserId = participant.getUserId();
+            if (targetUserId.equals(userId)) continue; // 자기 자신 제외
+
+            if (!connectedUserIds.contains(targetUserId)) {
+                User targetUser = userService.getUserById(targetUserId);
+                if (targetUser.getFcmToken() != null) {
+                    fcmService.sendFcm(targetUser.getFcmToken(), nickname, message.getContent());
+                }
+            }
+        }
 
         return ChatDtoRes.ChatMessageResponse.builder()
                 .messageId(saved.getId())

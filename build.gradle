@@ -52,6 +52,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	//websocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	//Firebase admin SDK
+	implementation 'com.google.firebase:firebase-admin:9.1.1'
 }
 
 tasks.named('test') {
