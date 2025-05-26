@@ -1,4 +1,4 @@
-package com.cook.cookapp.common.controller;
+package com.cook.cookapp.global.notification.controller;
 
 import com.cook.cookapp.apiPayload.ApiResponse;
 import com.cook.cookapp.global.notification.services.FcmService;
