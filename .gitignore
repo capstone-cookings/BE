@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Firebase 인증 키 ###
+src/main/resources/cook-app-ee30e-firebase-adminsdk-fbsvc-d5abf70e4c.json

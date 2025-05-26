@@ -5,14 +5,14 @@ import com.cook.cookapp.ingredient.entity.Ingredient;
 import com.cook.cookapp.post.entity.Post;
 import com.cook.cookapp.post.entity.SearchHistory;
 import com.cook.cookapp.recipe.entity.Recipe;
+import com.cook.cookapp.user.entity.Enum.TrustLevel;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cook.cookapp.user.entity.TrustLevel.BeginnerChef;
+import static com.cook.cookapp.user.entity.Enum.TrustLevel.BeginnerChef;
 
 @Getter
 @Setter
@@ -28,7 +28,6 @@ public class User extends BaseEntity {
 
     //사용자 이름
     @Column(length = 20, nullable = false)
-    @NotNull
     private String name;
 
     //사용자 닉네임
@@ -57,6 +56,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TrustLevel trustLevel = BeginnerChef;
+
+    //FCM 토큰
+    private String fcmToken;
 
     //식재료 리스트
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)

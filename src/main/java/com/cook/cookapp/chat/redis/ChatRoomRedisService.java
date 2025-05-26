@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 채팅방 참여자 실시간 관리를 위한 Redis 서비스
@@ -59,5 +60,24 @@ public class ChatRoomRedisService {
     // Redis에서 해당 메시지Id 키에 저장된 사용자 삭제
     public void removeReadUser(Long messageId, Long userId) {
         redisTemplate.opsForSet().remove("chat:read:" + messageId, userId.toString());
+    }
+
+    // FCM용 WebSocket 연결자 관리 메서드
+    private String connectedKey(Long roomId) {
+        return "chat:connected:" + roomId;
+    }
+
+    public void addConnectedUser(Long roomId, Long userId) {
+        redisTemplate.opsForSet().add(connectedKey(roomId), userId.toString());
+    }
+
+    public void removeConnectedUser(Long roomId, Long userId) {
+        redisTemplate.opsForSet().remove(connectedKey(roomId), userId.toString());
+    }
+
+    public List<Long> getConnectedUserIds(Long roomId) {
+        return redisTemplate.opsForSet().members(connectedKey(roomId)).stream()
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
     }
 }

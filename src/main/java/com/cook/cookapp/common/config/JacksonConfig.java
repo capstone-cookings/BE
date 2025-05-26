@@ -1,4 +1,4 @@
-package com.cook.cookapp.common;
+package com.cook.cookapp.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
