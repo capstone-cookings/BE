@@ -40,8 +40,9 @@ jobs:
         run: echo "CurrentTime=${{ steps.current-time.outputs.formattedTime }}"
         shell: bash
 
-      - name: Set env
-        run: echo "FIREBASE_KEY_JSON=${{ secrets.FIREBASE_KEY_JSON }}" >> $GITHUB_ENV
+      - name: Write Firebase service account to file
+        run: |
+          echo "${{ secrets.FIREBASE_KEY_JSON }}" > src/main/resources/firebase-service-account.json
 
       - name: Generate deployment package
         run: |
