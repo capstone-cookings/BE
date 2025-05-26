@@ -23,7 +23,7 @@ jobs:
 
       - name: Write Firebase service account to file
         run: |
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" > src/main/resources/firebase-service-account.json
+          echo "${{ secrets.FIREBASE_KEY_JSON }}" > firebase-service-account.json
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -51,7 +51,7 @@ jobs:
           cp Procfile deploy/Procfile
           cp -r .ebextensions_release deploy/.ebextensions
           cp -r .platform deploy/.platform
-          cp src/main/resources/firebase-service-account.json deploy/firebase-service-account.json
+          cp firebase-service-account.json deploy/firebase-service-account.json
           cd deploy && zip -r deploy.zip .
 
       - name: Beanstalk Deploy
