@@ -80,6 +80,8 @@ public class IngredientServiceImpl implements IngredientService{
             } catch (IOException e) {
                 throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
             }
+        }else{
+            amazonS3Util.deleteIngredientImage(ingredient.getId(), userId);
         }
     }
 
