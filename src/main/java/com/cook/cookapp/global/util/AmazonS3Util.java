@@ -481,6 +481,25 @@ public class AmazonS3Util {
         postImageRepository.flush();
     }
 
+    @Transactional
+    public void deleteIngredientImage(Long ingredientId, Long userId) {
+
+        Ingredient ingredient = ingredientRepository.findById(ingredientId).orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
+        IngredientImage ingredientImage = ingredientImageRepository.findByIngredient(ingredient);
+
+
+        if (!ingredient.getUser().getId().equals(userId) || !ingredientImage.getIngredient().getId().equals(ingredientId)) {
+            throw new GeneralException(ErrorStatus.UNAUTHORIZED_ACCESS);
+        }
+
+        String key = postPath + "/" + ingredientImage.getUuid() + "_" + ingredientImage.getOriginalFilename();
+        amazonS3Client.deleteObject(bucket, key);
+
+        ingredient.setIngredientImage(null);
+        ingredientImageRepository.delete(ingredientImage);
+        ingredientImageRepository.flush();
+    }
+
     // 이미지 유효성 검사
     private void validateImage(MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
