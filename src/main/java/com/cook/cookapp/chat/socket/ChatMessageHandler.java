@@ -6,6 +6,7 @@ import com.cook.cookapp.chat.dto.res.ChatDtoRes;
 import com.cook.cookapp.chat.entity.ChatMessage;
 import com.cook.cookapp.chat.entity.ChatRoom;
 import com.cook.cookapp.chat.redis.ChatRoomRedisService;
+import com.cook.cookapp.chat.redis.RedisWebSocketSessionManager;
 import com.cook.cookapp.chat.repository.ChatRoomParticipantRepository;
 import com.cook.cookapp.chat.service.ChatService;
 import com.cook.cookapp.chat.socket.dto.req.ChatMessageSocketRequest;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
@@ -37,11 +39,15 @@ public class ChatMessageHandler {
     private final UserService userService;
     private final ChatRoomRedisService chatRoomRedisService;
     private final ChatRoomParticipantRepository participantRepository;
+    private final RedisWebSocketSessionManager sessionManager;
 
     @MessageMapping("/chat/enter")
-    public void enter(ChatReadEventRequest request, Principal principal) {
+    public void enter(ChatReadEventRequest request, Principal principal,  StompHeaderAccessor accessor) {
         Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
         Long roomId = request.getRoomId();
+
+        String sessionId = accessor.getSessionId();
+        sessionManager.register(sessionId, userId, roomId);
 
         if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
             throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
