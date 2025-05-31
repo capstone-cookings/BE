@@ -12,6 +12,7 @@ import com.cook.cookapp.chat.service.ChatService;
 import com.cook.cookapp.chat.socket.dto.req.ChatMessageSocketRequest;
 import com.cook.cookapp.chat.socket.dto.req.ChatReadEventRequest;
 import com.cook.cookapp.common.security.JwtTokenProvider;
+import com.cook.cookapp.global.notification.services.FcmService;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class ChatMessageHandler {
     private final ChatRoomRedisService chatRoomRedisService;
     private final ChatRoomParticipantRepository participantRepository;
     private final RedisWebSocketSessionManager sessionManager;
+    private final FcmService fcmService;
 
     @MessageMapping("/chat/enter")
     public void enter(ChatReadEventRequest request, Principal principal,  StompHeaderAccessor accessor) {
@@ -105,7 +107,7 @@ public class ChatMessageHandler {
     @MessageMapping("/chat/message")
     public void handleChatMessage(ChatMessageSocketRequest request, Principal principal) {
         Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
-        User user = userService.getUserById(userId);
+        User sender = userService.getUserById(userId);
         Long roomId = request.getRoomId();
 
         // 참여자 권한 확인
@@ -114,21 +116,42 @@ public class ChatMessageHandler {
         }
 
         // 마감된 방인지 체크
-        ChatRoom room = chatService.getChatRoomEntity(request.getRoomId());
+        ChatRoom room = chatService.getChatRoomEntity(roomId);
         if (!room.isActive()) {
             throw new GeneralException(ErrorStatus.CHATROOM_CLOSED);
         }
 
-        // 메시지 저장 및 응답 전송
+        // 메시지 저장
         ChatDtoRes.ChatMessageResponse response = chatService.saveWebSocketMessage(
-                request.getRoomId(),
-                user.getId(),
-                user.getNickname(),
+                roomId,
+                sender.getId(),
+                sender.getNickname(),
                 request.getContent()
         );
-        // WebSocket 구독자에게 메시지 전송
-        messagingTemplate.convertAndSend("/sub/chat/room/" + request.getRoomId(), response);
+
+        // 메시지 브로드캐스트
+        messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, response);
+
+        //  FCM 푸시 전송 (연결 안된 사용자에게만)
+        List<Long> connectedUserIds = chatRoomRedisService.getConnectedUserIds(roomId);
+        List<Long> allUserIds = participantRepository.findUserIdsByRoomId(roomId);
+
+        for (Long targetUserId : allUserIds) {
+            if (targetUserId.equals(userId)) continue; // 본인은 제외
+            if (!connectedUserIds.contains(targetUserId)) {
+                User targetUser = userService.getUserById(targetUserId);
+                String token = targetUser.getFcmToken();
+                if (token != null && !token.isBlank()) {
+                    fcmService.sendFcm(
+                            token,
+                            sender.getNickname() + "님의 새 메시지",
+                            request.getContent()
+                    );
+                }
+            }
+        }
     }
+
 
 }
 
