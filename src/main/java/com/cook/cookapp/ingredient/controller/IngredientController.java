@@ -3,6 +3,7 @@ package com.cook.cookapp.ingredient.controller;
 import com.cook.cookapp.apiPayload.ApiResponse;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
+import com.cook.cookapp.ingredient.dto.req.IngredientUpdateDtoReq;
 import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
 import com.cook.cookapp.ingredient.service.IngredientService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,7 +65,7 @@ public class IngredientController {
     @Operation(summary = "식재료 수정 API", description = "사용자가 저장한 특정 식재료의 정보를 수정합니다.")
     @PatchMapping(value = "/{ingredientId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<String> updateIngredient(@PathVariable Long ingredientId,
-                                                @RequestPart @Valid IngredientDtoReq ingredientDtoReq,
+                                                @RequestPart @Valid IngredientUpdateDtoReq ingredientDtoReq,
                                                 @RequestPart(value = "ingredientImage", required = false) MultipartFile ingredientImage) {
         Long userId = jwtTokenProvider.getUserIdFromToken();
         ingredientService.updateIngredient(userId, ingredientId, ingredientDtoReq,ingredientImage);
