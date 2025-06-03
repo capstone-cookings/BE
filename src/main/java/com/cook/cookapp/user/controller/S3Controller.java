@@ -30,6 +30,14 @@ public class S3Controller {
         return ApiResponse.onSuccess("프로필 이미지 업로드 성공했습니다");
     }
 
+    @Operation(summary = "프로필 이미지 삭제 API", description = "프로필 이미지를 삭제합니다.")
+    @DeleteMapping("/delete-profile")
+    public ApiResponse<String> deleteProfileImage() {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        amazonS3Util.deleteProfileImage(userId);
+        return ApiResponse.onSuccess("게시글 이미지 삭제에 성공했습니다");
+    }
+
     @Operation(summary = "레시피 이미지 업로드 API", description = "레시피 이미지를 업로드 합니다.")
     @PostMapping(value = "/update-recipe/{recipeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<String> updateRecipeImage(@RequestPart("recipeImage") MultipartFile recipeImage, @PathVariable Long recipeId) throws IOException {

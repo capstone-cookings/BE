@@ -482,22 +482,16 @@ public class AmazonS3Util {
     }
 
     @Transactional
-    public void deleteIngredientImage(Long ingredientId, Long userId) {
+    public void deleteProfileImage(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        ProfileImage profileImage = profileImageRepository.findByUser(user);
 
-        Ingredient ingredient = ingredientRepository.findById(ingredientId).orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
-        IngredientImage ingredientImage = ingredientImageRepository.findByIngredient(ingredient);
-
-
-        if (!ingredient.getUser().getId().equals(userId) || !ingredientImage.getIngredient().getId().equals(ingredientId)) {
-            throw new GeneralException(ErrorStatus.UNAUTHORIZED_ACCESS);
-        }
-
-        String key = postPath + "/" + ingredientImage.getUuid() + "_" + ingredientImage.getOriginalFilename();
+        String key = profilePath + "/" + profileImage.getUuid() + "_" + profileImage.getOriginalFilename();
         amazonS3Client.deleteObject(bucket, key);
 
-        ingredient.setIngredientImage(null);
-        ingredientImageRepository.delete(ingredientImage);
-        ingredientImageRepository.flush();
+        user.setProfileImage(null);
+        profileImageRepository.delete(profileImage);
+        profileImageRepository.flush();
     }
 
     // 이미지 유효성 검사
