@@ -6,9 +6,11 @@ import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.global.util.AmazonS3Util;
 import com.cook.cookapp.ingredient.converter.IngredientConverter;
 import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
+import com.cook.cookapp.ingredient.dto.req.IngredientUpdateDtoReq;
 import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
 import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import com.cook.cookapp.ingredient.entity.Ingredient;
+import com.cook.cookapp.ingredient.repository.IngredientImageRepository;
 import com.cook.cookapp.ingredient.repository.IngredientRepository;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
@@ -30,6 +32,7 @@ public class IngredientServiceImpl implements IngredientService{
     private final UserRepository userRepository;
     private final IngredientConverter ingredientConverter;
     private final AmazonS3Util amazonS3Util;
+    private final IngredientImageRepository ingredientImageRepository;
 
 
     @Override
@@ -68,7 +71,7 @@ public class IngredientServiceImpl implements IngredientService{
     }
 
     @Override
-    public void updateIngredient(Long userId, Long ingredientId, IngredientDtoReq ingredientDtoReq, MultipartFile ingredientImage) {
+    public void updateIngredient(Long userId, Long ingredientId, IngredientUpdateDtoReq ingredientDtoReq, MultipartFile ingredientImage) {
         Ingredient ingredient = ingredientRepository.findByIdAndUserId(ingredientId, userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
 
@@ -80,8 +83,14 @@ public class IngredientServiceImpl implements IngredientService{
             } catch (IOException e) {
                 throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
             }
+            //imageurl 있다면 현재 이미지 유지 없다면 삭제하고 싶은 것
         }else{
-            amazonS3Util.deleteIngredientImage(ingredient.getId(), userId);
+            if(ingredientDtoReq.getImageUrl()==null || ingredientDtoReq.getImageUrl().isEmpty()) {
+                ingredient.setIngredientImage(null);
+                ingredientRepository.flush();
+                ingredientImageRepository.deleteById(ingredientId);
+                ingredientImageRepository.flush();
+            }
         }
     }
 

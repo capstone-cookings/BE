@@ -2,7 +2,7 @@ package com.cook.cookapp.ingredient.entity;
 
 
 import com.cook.cookapp.global.BaseEntity;
-import com.cook.cookapp.ingredient.dto.req.IngredientDtoReq;
+import com.cook.cookapp.ingredient.dto.req.IngredientUpdateDtoReq;
 import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import com.cook.cookapp.ingredient.entity.Enum.StorageType;
 import com.cook.cookapp.user.entity.User;
@@ -69,7 +69,7 @@ public class Ingredient extends BaseEntity {
     }
 
     // 식재료 정보 업데이트 메서드
-    public void update(IngredientDtoReq ingredientDtoReq) {
+    public void update(IngredientUpdateDtoReq ingredientDtoReq) {
         this.foodName = ingredientDtoReq.getFoodName();
         this.useByDate =  Instant.ofEpochMilli(ingredientDtoReq.getUseByDate())
                 .atZone(ZoneId.systemDefault()) // 밀리초(Long) → LocalDate 변환
