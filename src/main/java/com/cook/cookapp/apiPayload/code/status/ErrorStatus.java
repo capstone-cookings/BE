@@ -64,6 +64,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //Image
     INVALID_IMAGE_URL(HttpStatus.NOT_FOUND,"RECIPE4004","이미지 URL을 찾을 수 없습니다"),
+    INGREDIENT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND,"IMAGE4004","재료 이미지를 찾을 수 없습니다"),
 
     //ProfileImage
     FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "FILE4000", "이미지 용량은 5MB이하로 해주세요"),
