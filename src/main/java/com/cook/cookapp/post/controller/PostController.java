@@ -45,7 +45,7 @@ public class PostController {
     @GetMapping("")
     public ApiResponse<Page<PostResDto.UserPostRes>> getPost(
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.")int page, // 기본값 1로 설정
-            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
@@ -83,7 +83,7 @@ public class PostController {
     public ApiResponse<Page<PostResDto.UserPostRes>> searchPosts(
             @RequestParam(required = false) String keyword, // 검색 키워드
             @RequestParam(defaultValue = "1") @Positive(message = "페이지 번호는 1 이상의 값이어야 합니다.") int page, // 기본값 1로 설정
-            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Long userId = jwtTokenProvider.getUserIdFromToken();
         // 페이지 번호를 1-based에서 0-based로 변환

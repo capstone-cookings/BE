@@ -46,7 +46,7 @@ public class PostConverter {
                 .title(post.getTitle())
                 .price(post.getPrice())
                 .memberCount(post.getMemberCount())
-                .timeAgo(calTime(post.getUpdatedAt()))
+                .timeAgo(calTime(post.getCreatedAt()))
                 .likeCount(post.getLikeCount())
                 .liked(isLiked)
                 .isRoomActive(chatRoom.isActive())
@@ -80,7 +80,7 @@ public class PostConverter {
                 .category(post.getCategory())
                 .price(post.getPrice())
                 .memberCount(post.getMemberCount())
-                .timeAgo(calTime(post.getUpdatedAt()))
+                .timeAgo(calTime(post.getCreatedAt()))
                 .liked(isLiked)
                 .likeCount(post.getLikeCount())
                 .image(imageList)
@@ -93,9 +93,9 @@ public class PostConverter {
 
 
 
-    public static String calTime(LocalDateTime updatedAt) {
+    public static String calTime(LocalDateTime createdAt) {
         LocalDateTime now = LocalDateTime.now();
-        Duration duration = Duration.between(updatedAt, now);
+        Duration duration = Duration.between(createdAt, now);
 
         long seconds = duration.getSeconds();
         long minutes = seconds / 60;
