@@ -12,4 +12,7 @@ import java.time.LocalDateTime;
 public interface ReportRepository extends JpaRepository<Report, Long> {
     boolean existsByReporterAndReportedUserAndReportTypeAndCreatedAtAfter(
             User reporter, User reportedUser, ReportType type, LocalDateTime after);
+
+    void deleteAllByReportedUser(User user);
+    void deleteAllByReporter(User user);
 }
