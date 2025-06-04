@@ -192,4 +192,12 @@ public class UserController {
         return ApiResponse.onSuccess("FCM 토큰 저장 완료");
     }
     //FCM 토큰 삭제 API -> 알림 비활성화 시 호출
+
+    @Operation(summary = "회원탈퇴 API", description = "사용자의 모든 정보를 삭제하고 회원탈퇴합니다")
+    @DeleteMapping("/delete-user")
+    public ApiResponse<String> deleteUser() {
+        Long userId = jwtTokenProvider.getUserIdFromToken();
+        userService.deleteUser(userId);
+        return ApiResponse.onSuccess("회원 탈퇴 완료");
+    }
 }
