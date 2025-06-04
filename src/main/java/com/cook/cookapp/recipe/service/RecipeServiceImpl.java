@@ -85,8 +85,8 @@ public class RecipeServiceImpl implements RecipeService {
             Matcher matcher = pattern.matcher(recipeText);
 
             while (matcher.find()) {
-                instructions.append(matcher.group(1)) // 🔥 숫자 유지 (ex: "1. ")
-                        .append(matcher.group(2).trim()) // 🔥 단계 내용 추가
+                instructions.append(matcher.group(1)) //
+                        .append(matcher.group(2).trim()) //
                         .append("\n");
             }
 
@@ -111,7 +111,7 @@ public class RecipeServiceImpl implements RecipeService {
                                     newIngredient.setFoodName(name);
                                     return ingredientRepository.save(newIngredient);
                                 });
-                        return new RecipeIngredient(null, recipe, ingredient); // ❌ ID를 직접 설정하지 않음
+                        return new RecipeIngredient(null, recipe, ingredient);
                     })
                     .collect(Collectors.toList());
 
@@ -121,10 +121,10 @@ public class RecipeServiceImpl implements RecipeService {
 
 
         } catch (GeneralException e) {
-            throw e; // 미리 정의된 예외는 그대로 던짐
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new GeneralException(ErrorStatus.FAIL_OOOOO); // 명확한 에러 메시지 제공
+            throw new GeneralException(ErrorStatus.DUPLICATE_RECIPE);
         }
     }
 
