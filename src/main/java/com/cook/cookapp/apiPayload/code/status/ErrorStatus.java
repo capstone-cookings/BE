@@ -57,7 +57,9 @@ public enum ErrorStatus implements BaseErrorCode {
     NOT_LIKED_YET(HttpStatus.BAD_REQUEST, "RECIPE4000","레시피에 좋아요를 누르지 않았습니다"),
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "RECIPE4001","레시피의 소유자가 아닙니다"),
     INVALID_RECIPE_FORMAT(HttpStatus.BAD_REQUEST,"RECIPE4000" , "레시피 형식이 잘못됐습니다" ),
+    DUPLICATE_RECIPE(HttpStatus.BAD_REQUEST, "RECIPE4002", "이 레시피를 이미 저장하였습니다"),
 
+    //TODO 레시피 중복 저장 에러 메시지
     //Chatbot
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "400", "유효하지 않은 입력 값입니다."),
     OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OPENAI500", "AI 추천 서비스 호출 중 오류가 발생했습니다."),

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FcmService {
 
-    public void sendFcm(String targetToken, String title, String body) {
+    public void sendFcm(String targetToken, String title, String body, Long roomId) {
         try {
             Message message = Message.builder()
                     .setToken(targetToken)
@@ -20,6 +20,7 @@ public class FcmService {
                             .setTitle(title)
                             .setBody(body)
                             .build())
+                    .putData("roomId", String.valueOf(roomId))
                     .build();
 
             FirebaseMessaging.getInstance().sendAsync(message);
