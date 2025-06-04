@@ -21,7 +21,7 @@ public class FcmTestController {
     public ApiResponse<String> testSendFcm(@RequestParam String token,
                                            @RequestParam String title,
                                            @RequestParam String body) {
-        fcmService.sendFcm(token, title, body);
+        fcmService.sendFcm(token, title, body, Long.parseLong("999999999"));
         return ApiResponse.onSuccess("FCM 테스트 전송 완료");
     }
 }

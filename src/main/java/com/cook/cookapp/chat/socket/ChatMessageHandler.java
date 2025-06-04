@@ -145,7 +145,8 @@ public class ChatMessageHandler {
                     fcmService.sendFcm(
                             token,
                             sender.getNickname() + "님의 새 메시지",
-                            request.getContent()
+                            request.getContent(),
+                            roomId
                     );
                 }
             }
