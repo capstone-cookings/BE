@@ -262,7 +262,7 @@ public class ChatServiceImpl implements ChatService {
             if (!connectedUserIds.contains(targetUserId)) {
                 User targetUser = userService.getUserById(targetUserId);
                 if (targetUser.getFcmToken() != null) {
-                    fcmService.sendFcm(targetUser.getFcmToken(), nickname, message.getContent());
+                    fcmService.sendFcm(targetUser.getFcmToken(), nickname, message.getContent(), roomId);
                 }
             }
         }
