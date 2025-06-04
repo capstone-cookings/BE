@@ -24,4 +24,6 @@ public interface UserService {
     void updateNickname(Long userId, String nickname);
     User getUserById(Long id);
     void updateFcmToken(Long userId, String token);
+
+    void deleteUser(Long userId);
 }

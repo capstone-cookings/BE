@@ -5,11 +5,16 @@ import com.cook.cookapp.apiPayload.code.status.ErrorStatus;
 import com.cook.cookapp.chatbot.util.TastePreferenceValidator;
 import com.cook.cookapp.common.security.JwtTokenProvider;
 import com.cook.cookapp.global.util.AmazonS3Util;
+import com.cook.cookapp.ingredient.repository.IngredientRepository;
+import com.cook.cookapp.post.repository.PostRepository;
+import com.cook.cookapp.post.repository.SearchHistoryRepository;
+import com.cook.cookapp.recipe.repository.RecipeRepository;
 import com.cook.cookapp.user.converter.UserConverter;
 import com.cook.cookapp.user.dto.req.UserDtoReq;
 import com.cook.cookapp.user.dto.res.KakaoUserInfoResponseDto;
 import com.cook.cookapp.user.dto.res.UserDtoRes;
 import com.cook.cookapp.user.entity.User;
+import com.cook.cookapp.user.repository.ProfileImageRepository;
 import com.cook.cookapp.user.repository.ReportRepository;
 import com.cook.cookapp.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +36,11 @@ public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final AmazonS3Util amazonS3Util;
     private final ReportRepository reportRepository;
+    private final ProfileImageRepository profileImageRepository;
+    private final PostRepository postRepository;
+    private final RecipeRepository recipeRepository;
+    private final SearchHistoryRepository searchHistoryRepository;
+    private final IngredientRepository ingredientRepository;
 
     // 일반 로그인 처리: 이메일로 유저 찾고 토큰 발급
     public UserDtoRes.UserLoginRes login(HttpServletRequest request, HttpServletResponse response, UserDtoReq.LoginReq loginDto) {
@@ -180,4 +190,23 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
         user.setFcmToken(token);
     }
+
+    @Override
+    public void deleteUser(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        reportRepository.deleteAllByReportedUser(user);
+        reportRepository.deleteAllByReporter(user);
+
+        user.getIngredientList().clear();
+        user.getSearchHistoryList().clear();
+        user.getRecipeList().clear();
+        user.getPostList().clear();
+        user.setProfileImage(null);
+        userRepository.delete(user);
+        userRepository.flush();
+    }
+
+
 }
