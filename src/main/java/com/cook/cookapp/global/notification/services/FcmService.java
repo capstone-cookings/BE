@@ -29,4 +29,21 @@ public class FcmService {
             log.error("[FCM] 푸시 알림 전송 실패", e);
         }
     }
+
+    public void sendFcmIngredient(String targetToken, String title, String body) {
+        try {
+            Message message = Message.builder()
+                    .setToken(targetToken)
+                    .setNotification(Notification.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build())
+                    .build();
+
+            FirebaseMessaging.getInstance().sendAsync(message);
+            log.info("[FCM] 식재료 소비기한 푸시 알림 전송 완료 - 대상: {}", targetToken);
+        } catch (Exception e) {
+            log.error("[FCM] 식재료 소비기한 푸시 알림 전송 실패", e);
+        }
+    }
 }
