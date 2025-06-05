@@ -65,7 +65,7 @@ public class IngredientNotificationService {
     }
 
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 3 0 * * *") // 매일 00시 3분 정각
     public void sendScheduledNotifications() {
         LocalDateTime now = LocalDateTime.now();
         var schedules = notificationRepository.findByStatusAndScheduledAtBefore(NotificationStatus.PENDING, now);
