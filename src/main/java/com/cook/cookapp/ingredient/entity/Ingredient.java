@@ -13,6 +13,8 @@ import lombok.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -41,6 +43,7 @@ public class Ingredient extends BaseEntity {
     private int count;
 
     //알림 상태 (ON,OFF) - 기본값 ON.
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AlarmStatus alarmStatus = AlarmStatus.ON;
@@ -50,6 +53,7 @@ public class Ingredient extends BaseEntity {
     private IngredientImage ingredientImage;
 
     // 저장 타입 (냉장, 냉동) - 기본값 냉장.
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StorageType storageType = StorageType.REFRIGERATED;
@@ -57,6 +61,9 @@ public class Ingredient extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IngredientNotification> notifications = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
@@ -77,5 +84,9 @@ public class Ingredient extends BaseEntity {
         this.count = ingredientDtoReq.getCount();
         this.storageType = ingredientDtoReq.isStorageType() ? StorageType.FROZEN : StorageType.REFRIGERATED;
         this.alarmStatus = ingredientDtoReq.isAlarmStatus() ? AlarmStatus.ON : AlarmStatus.OFF;
+    }
+
+    public boolean isNotificationEnabled() {
+        return this.alarmStatus == AlarmStatus.ON;
     }
 }

@@ -86,7 +86,16 @@ public enum ErrorStatus implements BaseErrorCode {
     CHATROOM_FULL(HttpStatus.BAD_REQUEST, "CHAT4003", "채팅방 인원이 가득 찼습니다."),
     NOT_PARTICIPANT_CHATROOM(HttpStatus.BAD_REQUEST, "CHAT4004", "채팅방에 참여 중이지 않습니다."),
     CHATROOM_CLOSED(HttpStatus.BAD_REQUEST, "CHAT4005", "채팅방이 마감되었습니다."),
-    CHATROOM_NOT_OWNER(HttpStatus.FORBIDDEN, "CHAT4006", "채팅방을 마감할 권한이 없습니다.");
+    CHATROOM_NOT_OWNER(HttpStatus.FORBIDDEN, "CHAT4006", "채팅방을 마감할 권한이 없습니다."),
+
+    //식재료 소비기한 알림
+    INVALID_NOTIFICATION_TIME(HttpStatus.BAD_REQUEST, "INGREDIENT4001", "소비기한 이전으로만 알림을 예약할 수 있습니다."),
+    NOTIFICATION_DISABLED(HttpStatus.BAD_REQUEST, "INGREDIENT4002", "알림이 꺼진 상태입니다."),
+    ALREADY_RESERVED(HttpStatus.BAD_REQUEST, "INGREDIENT4003", "이미 알림이 예약된 식재료입니다."),
+    NOTIFICATION_TIME_IN_PAST(HttpStatus.BAD_REQUEST, "INGREDIENT4004", "현재 시간보다 이전으로는 예약할 수 없습니다."),
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION404", "해당 알림을 찾을 수 없습니다."),;
+
+
 
     private final HttpStatus httpStatus;
     private final String code;
