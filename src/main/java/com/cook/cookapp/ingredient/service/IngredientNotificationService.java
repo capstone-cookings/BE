@@ -84,12 +84,20 @@ public class IngredientNotificationService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<IngredientNotificationDtoRes> getMyNotifications(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         List<IngredientNotification> list = notificationRepository.findByUserAndStatusOrderByScheduledAtDesc(user, NotificationStatus.SENT);
+
+        // 안 읽은 알림 읽음 처리
+        List<IngredientNotification> unreadNotifications = list.stream()
+                .filter(n -> !n.isRead())
+                .toList();
+
+        unreadNotifications.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(unreadNotifications); // JPA 변경 감지로 생략 가능하나 명시적으로 저장
 
         return list.stream().map(n -> IngredientNotificationDtoRes.builder()
                 .id(n.getId())
@@ -101,20 +109,8 @@ public class IngredientNotificationService {
         ).toList();
     }
 
-    public void markAsRead(Long userId, Long notificationId) {
-        IngredientNotification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTIFICATION_NOT_FOUND));
-
-        if (!notification.getUser().getId().equals(userId)) {
-            throw new GeneralException(ErrorStatus.UNAUTHORIZED_ACCESS);
-        }
-
-        notification.setRead(true);
-    }
-
     @Transactional(readOnly = true)
     public long countUnread(Long userId) {
         return notificationRepository.countByUserIdAndIsReadFalseAndStatus(userId,  NotificationStatus.SENT);
     }
-
 }
