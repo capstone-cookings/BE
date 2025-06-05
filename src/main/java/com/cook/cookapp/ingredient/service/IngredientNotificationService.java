@@ -37,9 +37,9 @@ public class IngredientNotificationService {
         var ingredient = ingredientRepository.findById(ingredientId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
 
-        if (!ingredient.isNotificationEnabled()) {
-            throw new GeneralException(ErrorStatus.NOTIFICATION_DISABLED);
-        }
+        // if (!ingredient.isNotificationEnabled()) {
+        //     throw new GeneralException(ErrorStatus.NOTIFICATION_DISABLED);
+        // }
 
         if (whenToNotify.isAfter(ingredient.getUseByDate().atStartOfDay())) {
             throw new GeneralException(ErrorStatus.INVALID_NOTIFICATION_TIME);
