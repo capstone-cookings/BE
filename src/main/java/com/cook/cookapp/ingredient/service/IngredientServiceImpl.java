@@ -11,6 +11,7 @@ import com.cook.cookapp.ingredient.dto.res.IngredientDtoRes;
 import com.cook.cookapp.ingredient.entity.Enum.AlarmStatus;
 import com.cook.cookapp.ingredient.entity.Ingredient;
 import com.cook.cookapp.ingredient.repository.IngredientImageRepository;
+import com.cook.cookapp.ingredient.repository.IngredientNotificationScheduleRepository;
 import com.cook.cookapp.ingredient.repository.IngredientRepository;
 import com.cook.cookapp.user.entity.User;
 import com.cook.cookapp.user.repository.UserRepository;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +36,8 @@ public class IngredientServiceImpl implements IngredientService{
     private final IngredientConverter ingredientConverter;
     private final AmazonS3Util amazonS3Util;
     private final IngredientImageRepository ingredientImageRepository;
+    private final IngredientNotificationService ingredientNotificationService;
+    private final IngredientNotificationScheduleRepository scheduleRepository;
 
 
     @Override
@@ -48,6 +53,20 @@ public class IngredientServiceImpl implements IngredientService{
                 throw new GeneralException(ErrorStatus.INVALID_IMAGE_URL);
             }
         }
+        LocalDate useByDate = ingredient.getUseByDate();
+
+        LocalDateTime notify3DaysBefore = useByDate.minusDays(3).atStartOfDay();
+        LocalDateTime notify1DayBefore = useByDate.minusDays(1).atStartOfDay();
+
+        // 현재보다 미래인 경우에만 예약
+        if (notify3DaysBefore.isAfter(LocalDateTime.now())) {
+            ingredientNotificationService.scheduleNotification(userId, ingredient.getId(), notify3DaysBefore);
+        }
+
+        if (notify1DayBefore.isAfter(LocalDateTime.now())) {
+            ingredientNotificationService.scheduleNotification(userId, ingredient.getId(), notify1DayBefore);
+        }
+
     }
 
     @Override
