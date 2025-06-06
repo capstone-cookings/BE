@@ -31,7 +31,7 @@ public class Recipe extends BaseEntity {
     private boolean isLiked = false;
 
     //레시피 방법
-    @Column(length = 500, unique = true)
+    @Column(length = 500)
     private String instructions;
 
     //재료들
