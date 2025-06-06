@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,6 +94,12 @@ public class RecipeServiceImpl implements RecipeService {
             String instructionsText = instructions.toString().trim();
             if (instructionsText.isEmpty()) {
                 throw new GeneralException(ErrorStatus.INVALID_RECIPE_FORMAT);
+            }
+
+            Optional<Recipe> userRecipe = recipeRepository.findByUserIdAndTitleAndInstructions(userId, title, instructionsText);
+
+            if(userRecipe.isPresent()) {
+                throw new GeneralException(ErrorStatus.DUPLICATE_RECIPE);
             }
 
             Recipe recipe = Recipe.builder()
