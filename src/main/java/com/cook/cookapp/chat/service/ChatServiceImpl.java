@@ -423,7 +423,7 @@ public class ChatServiceImpl implements ChatService {
                 .map(user -> {
                     String imageUrl = amazonS3Util.getProfilePath(user.getId()); // S3 경로 가져오기
                     boolean isHost = user.getId().equals(room.getHostUserId());
-                    return ChatDtoRes.ChatRoomMemberListResponse.of(user.getNickname(), imageUrl, isHost);
+                    return ChatDtoRes.ChatRoomMemberListResponse.of(user.getId(),user.getNickname(), imageUrl, isHost);
                 })
                 .toList();
     }

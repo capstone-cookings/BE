@@ -63,6 +63,7 @@ public class ChatDtoRes {
     @Getter
     @AllArgsConstructor(staticName = "of")
     public static class ChatRoomMemberListResponse {
+        private Long userId;
         private String nickname;
         private String imageUrl; // 프로필 이미지 URL
         private boolean isHost; // 방장 여부
