@@ -48,12 +48,12 @@ public class ChatMessageHandler {
         Long userId = jwtTokenProvider.getUserIdFromPrincipal(principal);
         Long roomId = request.getRoomId();
 
-        String sessionId = accessor.getSessionId();
-        sessionManager.register(sessionId, userId, roomId);
-
         if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
             throw new GeneralException(ErrorStatus.UNAUTHORIZED_CHAT_ACCESS);
         }
+
+        String sessionId = accessor.getSessionId();
+        sessionManager.register(sessionId, userId, roomId);
 
         chatRoomRedisService.addConnectedUser(roomId, userId);
         log.info("WebSocket 입장: 유저 {} → 방 {}", userId, roomId);
