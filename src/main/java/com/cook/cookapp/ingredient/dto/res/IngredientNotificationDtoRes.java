@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 public class IngredientNotificationDtoRes {
     private Long id;
     private String ingredientName;
+    private String content;
     private LocalDateTime scheduledAt;
     private NotificationStatus status;
     private boolean isRead;
 }
+
