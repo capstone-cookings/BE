@@ -29,6 +29,8 @@ public class IngredientNotification {
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
+    private String content;
+
     private LocalDateTime scheduledAt;
 
     @Builder.Default

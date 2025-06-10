@@ -60,13 +60,14 @@ public class IngredientServiceImpl implements IngredientService{
 
         // 현재보다 미래인 경우에만 예약
         if (notify3DaysBefore.isAfter(LocalDateTime.now())) {
-            ingredientNotificationService.scheduleNotification(userId, ingredient.getId(), notify3DaysBefore);
+            String content = ingredient.getFoodName() + "의 소비기한이 3일 남았습니다!";
+            ingredientNotificationService.scheduleNotification(userId, ingredient.getId(), notify3DaysBefore,  content);
         }
 
         if (notify1DayBefore.isAfter(LocalDateTime.now())) {
-            ingredientNotificationService.scheduleNotification(userId, ingredient.getId(), notify1DayBefore);
+            String content = ingredient.getFoodName() + "의 소비기한이 1일 남았습니다!";
+            ingredientNotificationService.scheduleNotification(userId, ingredient.getId(), notify1DayBefore,  content);
         }
-
     }
 
     @Override

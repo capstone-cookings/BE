@@ -30,16 +30,12 @@ public class IngredientNotificationService {
     private final UserService userService;
     private final FcmService fcmService;
 
-    public void scheduleNotification(Long userId, Long ingredientId, LocalDateTime whenToNotify) {
+    public void scheduleNotification(Long userId, Long ingredientId, LocalDateTime whenToNotify, String content) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         var ingredient = ingredientRepository.findById(ingredientId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.INGREDIENT_NOT_FOUND));
-
-        // if (!ingredient.isNotificationEnabled()) {
-        //     throw new GeneralException(ErrorStatus.NOTIFICATION_DISABLED);
-        // }
 
         if (whenToNotify.isAfter(ingredient.getUseByDate().atStartOfDay())) {
             throw new GeneralException(ErrorStatus.INVALID_NOTIFICATION_TIME);
@@ -59,6 +55,7 @@ public class IngredientNotificationService {
                 .ingredient(ingredient)
                 .scheduledAt(whenToNotify)
                 .status(NotificationStatus.PENDING)
+                .content(content)
                 .build();
 
         notificationRepository.save(schedule);
@@ -79,7 +76,8 @@ public class IngredientNotificationService {
             }
 
             String token = userService.getFcmToken(schedule.getUser().getId());
-            fcmService.sendFcmIngredient(token, "소비기한 알림", ingredient.getFoodName() + " 소비기한이 임박합니다!");
+            fcmService.sendFcmIngredient(token, "소비기한 알림", schedule.getContent());
+
             schedule.setStatus(NotificationStatus.SENT);
         }
     }
@@ -102,6 +100,7 @@ public class IngredientNotificationService {
         return list.stream().map(n -> IngredientNotificationDtoRes.builder()
                 .id(n.getId())
                 .ingredientName(n.getIngredient().getFoodName())
+                .content(n.getContent())
                 .scheduledAt(n.getScheduledAt())
                 .status(n.getStatus())
                 .isRead(n.isRead())
