@@ -42,7 +42,7 @@ jwt:
 
 kakao:
   client_id: ${KAKAO_ID}
-  redirect_uri: https://api.refrigerator.asia/callback
+  redirect_uri: https://refrigerator.asia/callback
 
 cloud:
   aws:
